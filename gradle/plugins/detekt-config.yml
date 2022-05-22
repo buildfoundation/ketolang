@@ -1,0 +1,69 @@
+# See https://detekt.github.io/detekt/howto-silent-reports.html
+console-reports:
+  active: true
+  exclude:
+    - ProjectStatisticsReport
+    - ComplexityReport
+    - NotificationReport
+
+processors:
+  active: true
+  exclude:
+    - DetektProgressListener
+    - FunctionCountProcessor
+    - PropertyCountProcessor
+    - ClassCountProcessor
+    - PackageCountProcessor
+    - KtFileCountProcessor
+
+build:
+  maxIssues: 0
+
+comments:
+  UndocumentedPublicClass:
+    active: false
+  UndocumentedPublicFunction:
+    active: false
+  UndocumentedPublicProperty:
+    active: false
+  EndOfSentenceFormat:
+    active: false
+  CommentOverPrivateFunction:
+    active: false
+
+style:
+  OptionalUnit:
+    active: false
+  UnnecessaryParentheses:
+    active: false
+  ExpressionBodySyntax:
+    active: false
+  UseIfInsteadOfWhen:
+    active: false
+  OptionalWhenBraces:
+    active: false
+
+naming:
+  TopLevelPropertyNaming:
+    active: false
+  FunctionMaxLength:
+    active: false
+  BooleanPropertyNaming:
+    active: false
+
+complexity:
+  LabeledExpression:
+    active: false
+  NamedArguments:
+    threshold: 4
+
+coroutines:
+  InjectDispatcher:
+    active: false
+  SuspendFunWithCoroutineScopeReceiver:
+    active: false
+
+potential-bugs:
+  IgnoredReturnValue:
+    active: true
+    restrictToAnnotatedMethods: true

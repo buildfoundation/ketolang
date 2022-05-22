@@ -1,0 +1,10 @@
+# Gradle
+.gradle/
+build
+out
+
+# IntelliJ
+.idea/
+!.idea/codeStyles
+!.idea/inspectionProfiles/Project_Default.xml
+hs_err_pid*
