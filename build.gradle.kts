@@ -4,9 +4,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 // Declare, but do not apply plugins. This way we use same version across all modules.
 plugins {
     kotlin("jvm").version(deps.kotlin).apply(false)
-    kotlin("plugin.serialization").version(deps.kotlin).apply(false)
     id("io.gitlab.arturbosch.detekt").version(deps.detekt)
     id("com.github.ben-manes.versions").version(deps.gradle_versions_plugin)
+    id("com.github.johnrengelman.shadow").version(deps.shadow_plugin)
 }
 
 val jvmTargetVersion = "17"
