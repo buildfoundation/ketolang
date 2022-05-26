@@ -1,13 +1,15 @@
 The goal of Rikochet project is to create a Kotlin runtime environment in which File IO, Network IO and reading of environment variables and System time is prohibited.
 
-List of restricted functionality:
+List of restricted Kotlin functionality:
 
 - [x] File IO is not allowed (both reading and writing can be restricted)
 - Network IO is not allowed (both reading and writing can be restricted)
 - [x] `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
 - Reflection is not allowed
 - Static mutable state (companion object, static variables) is not allowed
-- Mutable collection as function args and return type are not allowed
+- Mutable collection as function args, return type and properties are not allowed
+- Delegated properties are not allowed
+- Type aliases are not allowed
 
 ## FAQ
 

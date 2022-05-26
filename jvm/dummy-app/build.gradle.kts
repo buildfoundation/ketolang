@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     application
     kotlin("jvm")
+    id("com.google.devtools.ksp")
 }
 
 group = "com.pushtorefresh.rikochet.dummyapp"
@@ -17,4 +18,8 @@ tasks.withType<KotlinCompile> {
     dependsOn(
         ":jvm:jvm-agent:shadowJar"
     )
+}
+
+dependencies {
+    ksp(project(":jvm:kotlinc-symbol-processor"))
 }
