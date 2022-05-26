@@ -2,8 +2,6 @@
 
 package com.pushtorefresh.rikochet.dummyapp
 
-import java.io.File
-
 
 const val constValInt = 1
 
@@ -27,14 +25,36 @@ class Y {
     companion object K {
     }
 
-    fun returnList(): List<String> {
+    fun returnImmutableList(): List<String> {
         return mutableListOf()
     }
+
+    /*fun returnMutableList(): MutableList<String> {
+        return mutableListOf()
+    }*/
+
+    fun returnImmutableMap(): Map<String, Int> {
+        return mutableMapOf()
+    }
+
+    /*fun returnMutableMap(): MutableMap<String, Int> {
+        return mutableMapOf()
+    }*/
+
+    fun acceptImmutableList(list: List<Int>): Int {
+        return list.size
+    }
+
+    /*fun acceptMutableList(list: MutableList<Int>): Int {
+        return list.size
+    }*/
 }
 
+/*
 fun main() {
     println("Hello world!")
     File("test-${System.currentTimeMillis()}").writeText("abc")
     println("Text written to file!")
     println("Goodbye.")
 }
+*/

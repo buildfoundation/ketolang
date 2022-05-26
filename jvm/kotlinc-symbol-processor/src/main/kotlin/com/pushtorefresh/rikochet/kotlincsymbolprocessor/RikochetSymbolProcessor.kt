@@ -1,15 +1,18 @@
 package com.pushtorefresh.rikochet.kotlincsymbolprocessor
 
 import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFunctionDeclaration
+import com.google.devtools.ksp.symbol.KSNode
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
-import com.google.devtools.ksp.symbol.KSTypeReference
 import com.google.devtools.ksp.symbol.Modifier
 
 class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
@@ -34,7 +37,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             .toList()
 
         if (rikochetValidationErrors.isNotEmpty()) {
-            rikochetValidationErrors.forEach { environment.logger.warn(it.message, it.node) }
+            rikochetValidationErrors.forEach { environment.logger.warn("${it.message}, node name = '${it.node.printableName()}'", it.node) }
             environment.logger.error("Rikochet validation errors were found, aborting compilation!")
         }
 
@@ -44,6 +47,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     private fun validateDeclaration(declaration: KSDeclaration, resolver: Resolver): List<RikochetValidationError?> {
         return when (declaration) {
             is KSPropertyDeclaration -> listOf(validateProperty(declaration, resolver))
+            is KSFunctionDeclaration -> listOf(validateFunction(declaration, resolver))
             is KSTypeAlias -> listOf(validateTypeAlias(declaration))
             is KSClassDeclaration -> declaration.declarations.flatMap { validateDeclaration(it, resolver) }.toList()
             else -> emptyList()
@@ -56,9 +60,11 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     ): RikochetValidationError? {
         // Checks are ordered in most likely frequent use-case order for better performance.
 
+        val type = property.type.resolve()
+
         if (property.modifiers.contains(Modifier.CONST)) {
             return null
-        } else if (property.type.isPrimitive() || property.type.isString()) {
+        } else if (type.isPrimitive() || type.isString()) {
             return RikochetValidationError(
                 "Rikochet error: primitive and String properties must be declared as 'const'",
                 property
@@ -72,8 +78,8 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             )
         }
 
-        if (property.type.isCollection()) {
-            if (property.type.isImmutableCollection()) {
+        if (type.isCollection()) {
+            if (type.isImmutableCollection()) {
                 return null
             } else {
                 return RikochetValidationError(
@@ -83,7 +89,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             }
         }
 
-        if (property.type.isArray()) {
+        if (type.isArray()) {
             return RikochetValidationError(
                 "Rikochet error: top-level array properties are not allowed because arrays are mutable",
                 property
@@ -104,25 +110,56 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
         return RikochetValidationError("Rikochet error: type-aliases are not allowed!", typeAlias)
     }
 
-    private fun KSTypeReference.isPrimitive(): Boolean {
-        val qualifiedName = this.resolve().declaration.qualifiedName?.asString()
+    private fun validateFunction(function: KSFunctionDeclaration, resolver: Resolver): RikochetValidationError? {
+        if (function.isConstructor()) {
+            // TODO: validate constructors too.
+            return null
+        }
+
+        val returnType = function.returnType!!.resolve()
+
+        if (returnType == resolver.builtIns.unitType) {
+            return RikochetValidationError("Rikochet error: functions returning Unit are not allowed!", function)
+        }
+
+        if (returnType.isCollection()) {
+            if (returnType.isImmutableCollection()) {
+                return null
+            } else {
+                return RikochetValidationError("Rikochet error: functions returning mutable collections are not allowed!", function)
+            }
+        }
+
+        if (function.parameters.map { it.type.resolve() }.all { it.isPrimitive() || it.isImmutableCollection() }) {
+            return null
+        } else {
+            return RikochetValidationError("Rikochet error: functions accepting mutable parameters are not allowed!", function)
+        }
+
+        /*return RikochetValidationError(
+            "Rikochet error: function looks suspicious! Perhaps Rikochet needs an update to validate it.",
+            function
+        )*/
+    }
+
+    private fun KSType.isPrimitive(): Boolean {
+        val qualifiedName = declaration.qualifiedName?.asString()
         return qualifiedName == "kotlin.Int"
                 || qualifiedName == "kotlin.Long"
                 || qualifiedName == "kotlin.Short"
                 || qualifiedName == "kotlin.Byte"
     }
 
-    private fun KSTypeReference.isString(): Boolean {
-        return this.resolve().declaration.qualifiedName?.asString() == "kotlin.String"
+    private fun KSType.isString(): Boolean {
+        return declaration.qualifiedName?.asString() == "kotlin.String"
     }
 
-    private fun KSTypeReference.isArray(): Boolean {
-        return this.resolve().declaration.qualifiedName?.asString() == "kotlin.Array"
+    private fun KSType.isArray(): Boolean {
+        return declaration.qualifiedName?.asString() == "kotlin.Array"
     }
 
-    private fun KSTypeReference.isImmutableCollection(): Boolean {
-        val resolved = this.resolve()
-        val qualifiedName = resolved.declaration.qualifiedName?.asString()
+    private fun KSType.isImmutableCollection(): Boolean {
+        val qualifiedName = declaration.qualifiedName?.asString()
 
         val isImmutableCollection = qualifiedName == "kotlin.collections.List"
                 || qualifiedName == "kotlin.collections.Set"
@@ -132,12 +169,18 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             return false
         }
 
-        return resolved.arguments.all { it.type!!.isPrimitive() || it.type!!.isString() }
+        return arguments.all { it.type!!.resolve().isPrimitive() || it.type!!.resolve().isString() }
     }
 
-    private fun KSTypeReference.isCollection(): Boolean {
-        val resolved = this.resolve()
-        return COLLECTION.asStarProjectedType().isAssignableFrom(resolved) || MAP.asStarProjectedType()
-            .isAssignableFrom(resolved)
+    private fun KSType.isCollection(): Boolean {
+        return COLLECTION.asStarProjectedType().isAssignableFrom(this)
+                || MAP.asStarProjectedType().isAssignableFrom(this)
+    }
+
+    private fun KSNode.printableName(): String? {
+        return when (this) {
+            is KSDeclaration -> simpleName.asString()
+            else -> "no printable name"
+        }
     }
 }
