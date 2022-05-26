@@ -58,8 +58,6 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
         property: KSPropertyDeclaration,
         @Suppress("UNUSED_PARAMETER") resolver: Resolver
     ): RikochetValidationError? {
-        // Checks are ordered in most likely frequent use-case order for better performance.
-
         val type = property.type.resolve()
 
         if (property.modifiers.contains(Modifier.CONST)) {
@@ -69,6 +67,10 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                 "Rikochet error: primitive and String properties must be declared as 'const'",
                 property
             )
+        }
+
+        if (property.modifiers.contains(Modifier.LATEINIT)) {
+            return RikochetValidationError("Rikochet error: lateinit properties are not allowed!", property)
         }
 
         if (property.isMutable) {

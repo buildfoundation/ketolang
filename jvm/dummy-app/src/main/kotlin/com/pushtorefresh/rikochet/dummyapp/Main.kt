@@ -16,6 +16,8 @@ val immutableMapOfPrimitives = mapOf<String, Int>()
 //val mutableMapOfPrimitives = mutableMapOf<String, Int>()
 //val immutableMapOfDynamic = mapOf<String, Array<Int>>()
 //val mutableMapOfDynamic = mutableMapOf<String, Array<Int>>()
+//lateinit var lateinitString: String
+//lateinit var lateinitList: List<String>
 //typealias a = String
 
 class Y {

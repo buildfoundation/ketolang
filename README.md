@@ -6,15 +6,16 @@ List of restricted Kotlin functionality:
 - Network IO is not allowed (both reading and writing can be restricted)
 - [x] `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
 - Reflection is not allowed
-- Static mutable state (companion object, static variables) is not allowed
-- Mutable collection as function args, return type and properties are not allowed
-- Delegated properties are not allowed
-- Type aliases are not allowed
+- [x] Static mutable state (companion object, static variables) is not allowed
+- [x] Mutable collections as function args, return type or properties are not allowed
+- [x] Delegated properties are not allowed
+- [x] Type aliases are not allowed
+- Type casting is not allowed (ie casting List to MutableList to get to mutable state)
 
 ## FAQ
 
 Q: Why would you need such restrictive environment?
-A: To use Kotlin as embedded configuration language. Ie in build systems.
+A: To create a version of Kotlin that is side-effectless. To then use it as embedded configuration language and so on. Ie in build systems.
 
 Q: Why not use Docker or other form of containerization?
 A: We'd love to, but containers do not offer cross-platform (Linux, macOS, Windows) support and are not feasible for embedded use-cases like a Build System configuration language, and container doesn't prevent program from reading current time & date.
