@@ -73,14 +73,14 @@ allprojects {
             project.dependencies.add("testImplementation", "org.junit.jupiter:junit-jupiter:${deps.junit}")
             project.dependencies.add("testImplementation", "org.jetbrains.kotlin:kotlin-test-junit5:${deps.kotlin_test}")
 
-            if (systemProperties["junit.jupiter.execution.parallel.enabled"] == null) {
+            /*if (systemProperties["junit.jupiter.execution.parallel.enabled"] == null) {
                 // Run separate test classes within a module in parallel.
                 systemProperty("junit.jupiter.execution.parallel.enabled", "true")
                 // Multiply CPU cores x2
                 systemProperty("junit.jupiter.execution.parallel.config.dynamic.factor", "2")
                 // Run separate tests in same class in parallel.
                 systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-            }
+            }*/
 
             testLogging.events.addAll(testEventsToLog)
         }
