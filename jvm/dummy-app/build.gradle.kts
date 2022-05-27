@@ -21,5 +21,5 @@ tasks.withType<KotlinCompile> {
 }
 
 dependencies {
-    ksp(project(":jvm:kotlinc-symbol-processor"))
+    ksp(project(":kotlinc:ksp-validator"))
 }
