@@ -20,6 +20,12 @@ val immutableMapOfPrimitives = mapOf<String, Int>()
 //lateinit var lateinitList: List<String>
 //typealias a = String
 
+data class SampleDataClass(val i: Int)
+
+interface SampleInterface {
+
+}
+
 class Y {
 
     //var varString = "var string"

@@ -11,6 +11,7 @@ List of restricted Kotlin functionality:
 - [x] Delegated properties are not allowed
 - [x] Type aliases are not allowed
 - Type casting is not allowed (ie casting List to MutableList to get to mutable state)
+- Classes and interfaces are not allowed, however data classes are allowed
 
 ## FAQ
 

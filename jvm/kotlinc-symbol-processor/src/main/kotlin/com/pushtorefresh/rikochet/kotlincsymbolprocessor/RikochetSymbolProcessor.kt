@@ -1,6 +1,7 @@
 package com.pushtorefresh.rikochet.kotlincsymbolprocessor
 
 import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.isAbstract
 import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
@@ -37,7 +38,12 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             .toList()
 
         if (rikochetValidationErrors.isNotEmpty()) {
-            rikochetValidationErrors.forEach { environment.logger.warn("${it.message}, node name = '${it.node.printableName()}'", it.node) }
+            rikochetValidationErrors.forEach {
+                environment.logger.warn(
+                    "${it.message}, node name = '${it.node.printableName()}'",
+                    it.node
+                )
+            }
             environment.logger.error("Rikochet validation errors were found, aborting compilation!")
         }
 
@@ -49,7 +55,15 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             is KSPropertyDeclaration -> listOf(validateProperty(declaration, resolver))
             is KSFunctionDeclaration -> listOf(validateFunction(declaration, resolver))
             is KSTypeAlias -> listOf(validateTypeAlias(declaration))
-            is KSClassDeclaration -> declaration.declarations.flatMap { validateDeclaration(it, resolver) }.toList()
+            is KSClassDeclaration -> {
+                validateClass(declaration).let {
+                    if (it == null) {
+                        declaration.declarations.flatMap { validateDeclaration(it, resolver) }.toList()
+                    } else {
+                        listOf(it)
+                    }
+                }
+            }
             else -> emptyList()
         }
     }
@@ -128,20 +142,41 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             if (returnType.isImmutableCollection()) {
                 return null
             } else {
-                return RikochetValidationError("Rikochet error: functions returning mutable collections are not allowed!", function)
+                return RikochetValidationError(
+                    "Rikochet error: functions returning mutable collections are not allowed!",
+                    function
+                )
             }
         }
 
         if (function.parameters.map { it.type.resolve() }.all { it.isPrimitive() || it.isImmutableCollection() }) {
             return null
         } else {
-            return RikochetValidationError("Rikochet error: functions accepting mutable parameters are not allowed!", function)
+            return RikochetValidationError(
+                "Rikochet error: functions accepting mutable parameters are not allowed!",
+                function
+            )
         }
 
         /*return RikochetValidationError(
             "Rikochet error: function looks suspicious! Perhaps Rikochet needs an update to validate it.",
             function
         )*/
+    }
+
+    private fun validateClass(clazz: KSClassDeclaration): RikochetValidationError? {
+        if (clazz.isAbstract()) {
+            return RikochetValidationError("Rikochet error: abstract classes and interfaces are not allowed!", clazz)
+        }
+
+        if (clazz.modifiers.size == 1 && clazz.modifiers.contains(Modifier.DATA)) {
+            return null
+        }
+
+        return RikochetValidationError(
+            "Rikochet error: class looks suspicious! Perhaphs Rikochet needs an update to validate it.",
+            clazz
+        )
     }
 
     private fun KSType.isPrimitive(): Boolean {

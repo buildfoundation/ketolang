@@ -8,3 +8,6 @@ out
 !.idea/codeStyles
 !.idea/inspectionProfiles/Project_Default.xml
 hs_err_pid*
+
+# OS garbage
+**/.DS_store
