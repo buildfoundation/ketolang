@@ -20,9 +20,10 @@ import com.google.devtools.ksp.symbol.Modifier
 class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
     private lateinit var resolver: Resolver
-    private val MUTABLE_COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.MutableCollection")!! }
-    private val COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Collection")!! }
-    private val MAP by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Map")!! }
+    private val TYPE_MUTABLE_COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.MutableCollection")!! }
+    private val TYPE_COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Collection")!! }
+    private val TYPE_MAP by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Map")!! }
+    private val TYPE_ANY by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.Any")!! }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         this.resolver = resolver
@@ -72,9 +73,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     private fun validateProperty(
         property: KSPropertyDeclaration
     ): RikochetValidationError? {
-        val parentDeclaration = property.parentDeclaration
-
-        return when (parentDeclaration) {
+        return when (val parentDeclaration = property.parentDeclaration) {
             is KSClassDeclaration -> {
                 when {
                     parentDeclaration.modifiers.size == 1 && parentDeclaration.modifiers.contains(Modifier.DATA) -> validateDataClassProperty(
@@ -218,6 +217,10 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             return RikochetValidationError("Rikochet error: functions returning Unit are not allowed!", function)
         }
 
+        if (returnType.declaration == TYPE_ANY) {
+            return RikochetValidationError("Rikochet error: functions returning Any are not allowed!", function)
+        }
+
         if (returnType.isCollection()) {
             if (returnType.isImmutableCollection()) {
                 return null
@@ -229,7 +232,14 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             }
         }
 
-        if (function.parameters.map { it.type.resolve() }.all { it.isPrimitive() || it.isImmutableCollection() }) {
+        if (function.parameters.isEmpty()) {
+            return RikochetValidationError(
+                "Rikochet error: functions without parameters are not allowed!",
+                function
+            )
+        }
+
+        if (function.parameters.map { it.type.resolve() }.all { it.isPrimitive() || it.isString() || it.isImmutableCollection() }) {
             return null
         } else {
             return RikochetValidationError(
@@ -292,8 +302,8 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     }
 
     private fun KSType.isCollection(): Boolean {
-        return COLLECTION.asStarProjectedType().isAssignableFrom(this)
-                || MAP.asStarProjectedType().isAssignableFrom(this)
+        return TYPE_COLLECTION.asStarProjectedType().isAssignableFrom(this)
+                || TYPE_MAP.asStarProjectedType().isAssignableFrom(this)
     }
 
     private fun KSNode.printableName(): String? {
