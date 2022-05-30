@@ -6,6 +6,7 @@ import com.google.devtools.ksp.isConstructor
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.symbol.ClassKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
@@ -18,14 +19,13 @@ import com.google.devtools.ksp.symbol.Modifier
 
 class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
-    private lateinit var MUTABLE_COLLECTION: KSClassDeclaration
-    private lateinit var COLLECTION: KSClassDeclaration
-    private lateinit var MAP: KSClassDeclaration
+    private lateinit var resolver: Resolver
+    private val MUTABLE_COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.MutableCollection")!! }
+    private val COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Collection")!! }
+    private val MAP by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.Map")!! }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        MUTABLE_COLLECTION = resolver.getClassDeclarationByName("kotlin.collections.MutableCollection")!!
-        COLLECTION = resolver.getClassDeclarationByName("kotlin.collections.Collection")!!
-        MAP = resolver.getClassDeclarationByName("kotlin.collections.Map")!!
+        this.resolver = resolver
 
         val rikochetValidationErrors = resolver
             .getAllFiles()
@@ -52,7 +52,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
 
     private fun validateDeclaration(declaration: KSDeclaration, resolver: Resolver): List<RikochetValidationError?> {
         return when (declaration) {
-            is KSPropertyDeclaration -> listOf(validateProperty(declaration, resolver))
+            is KSPropertyDeclaration -> listOf(validateProperty(declaration))
             is KSFunctionDeclaration -> listOf(validateFunction(declaration, resolver))
             is KSTypeAlias -> listOf(validateTypeAlias(declaration))
             is KSClassDeclaration -> {
@@ -64,15 +64,41 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                     }
                 }
             }
+
             else -> emptyList()
         }
     }
 
     private fun validateProperty(
-        property: KSPropertyDeclaration,
-        @Suppress("UNUSED_PARAMETER") resolver: Resolver
+        property: KSPropertyDeclaration
     ): RikochetValidationError? {
-        val type = property.type.resolve()
+        val parentDeclaration = property.parentDeclaration
+
+        return when (parentDeclaration) {
+            is KSClassDeclaration -> {
+                when {
+                    parentDeclaration.modifiers.size == 1 && parentDeclaration.modifiers.contains(Modifier.DATA) -> validateDataClassProperty(
+                        property
+                    )
+                    parentDeclaration.classKind == ClassKind.ENUM_CLASS -> validateEnumProperty(property)
+                    else -> RikochetValidationError(
+                        "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+                        property
+                    )
+                }
+            }
+            null -> validateTopLevelProperty(property)
+            else -> RikochetValidationError(
+                "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+                property
+            )
+        }
+    }
+
+    private fun validateTopLevelProperty(
+        property: KSPropertyDeclaration,
+    ): RikochetValidationError? {
+        val type by lazy(LazyThreadSafetyMode.NONE) { property.type.resolve() }
 
         if (property.modifiers.contains(Modifier.CONST)) {
             return null
@@ -120,6 +146,60 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
             property
         )
+    }
+
+    private fun validateDataClassProperty(
+        property: KSPropertyDeclaration,
+    ): RikochetValidationError? {
+        val type by lazy(LazyThreadSafetyMode.NONE) { property.type.resolve() }
+
+        if (property.modifiers.contains(Modifier.LATEINIT)) {
+            return RikochetValidationError("Rikochet error: lateinit properties are not allowed!", property)
+        }
+
+        if (property.isMutable) {
+            return RikochetValidationError(
+                "Rikochet error: mutable properties are not allowed!",
+                property
+            )
+        }
+
+        if (type.isPrimitive() || type.isString()) {
+            return null
+        }
+
+        if (type.isCollection()) {
+            if (type.isImmutableCollection()) {
+                return null
+            } else {
+                return RikochetValidationError(
+                    "Rikochet error: mutable collection properties are not allowed!",
+                    property
+                )
+            }
+        }
+
+        if (type.isArray()) {
+            return RikochetValidationError(
+                "Rikochet error: array properties are not allowed because arrays are mutable",
+                property
+            )
+        }
+
+        if (property.isDelegated()) {
+            return RikochetValidationError("Rikochet error: delegated properties are not allowed!", property)
+        }
+
+        return RikochetValidationError(
+            "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+            property
+        )
+    }
+
+    private fun validateEnumProperty(
+        property: KSPropertyDeclaration
+    ): RikochetValidationError? {
+        return validateDataClassProperty(property)
     }
 
     private fun validateTypeAlias(typeAlias: KSTypeAlias): RikochetValidationError? {
@@ -171,10 +251,12 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
 
         if (clazz.modifiers.size == 1 && clazz.modifiers.contains(Modifier.DATA)) {
             return null
+        } else if (clazz.modifiers.size == 1 && clazz.modifiers.contains(Modifier.ENUM) || clazz.classKind == ClassKind.ENUM_ENTRY) {
+            return null
         }
 
         return RikochetValidationError(
-            "Rikochet error: class looks suspicious! Perhaphs Rikochet needs an update to validate it.",
+            "Rikochet error: regular classes are not allowed, only data classes and enums are allowed!",
             clazz
         )
     }

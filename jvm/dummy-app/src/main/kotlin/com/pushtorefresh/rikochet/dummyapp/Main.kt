@@ -66,3 +66,17 @@ fun main() {
     println("Goodbye.")
 }
 */
+
+enum class E(var x: Any) {
+    A(x=1);
+}
+
+fun noGodPlease(a: E) {
+    a.x="pizdos"
+}
+
+fun main() {
+    println(E.A.x)
+    noGodPlease(E.A)
+    println(E.A.x)
+}
