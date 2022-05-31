@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class FunctionTopLevelTest {
+class FunctionsTopLevelTest {
 
     @Test
     fun `return type Unit is not allowed`() {
@@ -161,6 +161,25 @@ class FunctionTopLevelTest {
         assertContains(
             result.messages,
             "Rikochet error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+        )
+    }
+
+    @Test
+    fun `suspend function is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            suspend fun f(b: Int): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Rikochet error: suspend functions are not allowed!, node name = 'f'"
         )
     }
 }

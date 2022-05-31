@@ -79,6 +79,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                     parentDeclaration.modifiers.size == 1 && parentDeclaration.modifiers.contains(Modifier.DATA) -> validateDataClassProperty(
                         property
                     )
+
                     parentDeclaration.classKind == ClassKind.ENUM_CLASS -> validateEnumProperty(property)
                     else -> RikochetValidationError(
                         "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
@@ -86,6 +87,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                     )
                 }
             }
+
             null -> validateTopLevelProperty(property)
             else -> RikochetValidationError(
                 "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
@@ -206,9 +208,34 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     }
 
     private fun validateFunction(function: KSFunctionDeclaration, resolver: Resolver): RikochetValidationError? {
+        return when (function.parentDeclaration) {
+            is KSClassDeclaration -> validateClassFunction(function)
+            null -> validateTopLevelFunction(function, resolver)
+            else -> RikochetValidationError(
+                "Rikochet error: function looks suspicious! Perhaps Rikochet needs an update to validate it",
+                function
+            )
+        }
+    }
+
+    private fun validateClassFunction(function: KSFunctionDeclaration): RikochetValidationError? {
         if (function.isConstructor()) {
             // TODO: validate constructors too.
             return null
+        } else {
+            return RikochetValidationError(
+                "Rikochet error: functions in classes are not allowed!",
+                function
+            )
+        }
+    }
+
+    private fun validateTopLevelFunction(
+        function: KSFunctionDeclaration,
+        resolver: Resolver
+    ): RikochetValidationError? {
+        if (function.modifiers.contains(Modifier.SUSPEND)) {
+            return RikochetValidationError("Rikochet error: suspend functions are not allowed!", function)
         }
 
         val returnType = function.returnType!!.resolve()
@@ -239,7 +266,8 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             )
         }
 
-        if (function.parameters.map { it.type.resolve() }.all { it.isPrimitive() || it.isString() || it.isImmutableCollection() }) {
+        if (function.parameters.map { it.type.resolve() }
+                .all { it.isPrimitive() || it.isString() || it.isImmutableCollection() }) {
             return null
         } else {
             return RikochetValidationError(
