@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlinsymbolprocessor
+package com.pushtorefresh.ketolang.kotlinsymbolprocessor
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -21,7 +21,7 @@ class ArrayDataClassPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: mutable properties are not allowed!, node name = 'b'"
+            "ketolang error: mutable properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -38,7 +38,7 @@ class ArrayDataClassPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: array properties are not allowed because arrays are mutable, node name = 'b'"
+            "ketolang error: array properties are not allowed because arrays are mutable, node name = 'b'"
         )
     }
 }

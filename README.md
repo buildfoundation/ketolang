@@ -1,7 +1,7 @@
 >The future of general purpose _configuration_ languages.
 
-Rikochet is a dialect of Kotlin without side-effects, it allows only data-classes and pure functions. 
-Rikochet aims to cover use-cases of Starlark language but in compile-time type-safe environment of Kotlin and with benefit of running in more performant environment than an interpreter (JVM, Native).
+Ketolang is a dialect of Kotlin without side-effects, it allows only data-classes and pure functions. 
+Ketolang aims to cover use-cases of Starlark language but in compile-time type-safe environment of Kotlin and with benefit of running in more performant environment than an interpreter (JVM, Native).
 
 List of restricted Kotlin functionality (each option has feature flag to enable/disable it):
 
@@ -28,11 +28,11 @@ A: Containers do not offer native cross-platform (Linux, macOS, Windows) runtime
 Q: Why Kotlin? There are languages like Starlark exactly for this purpose!
 A: Starlark is great, but Kotlin offers more — compile-time type safety, convenient collections API, great IDE support and so on.
 
-Q: What Kotlin runtime environments does Rikochet support?
+Q: What Kotlin runtime environments does Ketolang support?
 A: JVM, we're working on Kotlin Native too, JS is out of scope right now but may be supported if someone can take a lead.
 
-Q: How does Rikochet implement its restrictiveness?
-A: Rikochet restricts Kotlin language and access to its stdlib at compile time via compile plugin (KSP).
+Q: How does Ketolang implement its restrictiveness?
+A: Ketolang restricts Kotlin language and access to its stdlib at compile time via compile plugin (KSP).
 
-Q: Is it possible to use libraries with Rikochet?
-A: Yes! But with a caveat: libraries should be included as sources to support JVM and Native environments and to verify that libraries don't violate Rikochet restrictions. However, if desired by integration logic — libraries of course can provide their API for side-effects in a controlled manner. This is how Starlark is integrated into Bazel.
+Q: Is it possible to use libraries with Ketolang?
+A: Yes! But with a caveat: libraries should be included as sources to support JVM and Native environments and to verify that libraries don't violate Ketolang restrictions. However, if desired by integration logic — libraries of course can provide their API for side-effects in a controlled manner. This is how Starlark is integrated into Bazel.

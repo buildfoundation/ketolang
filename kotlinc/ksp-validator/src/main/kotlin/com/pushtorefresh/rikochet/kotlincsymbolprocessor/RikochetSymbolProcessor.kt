@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlincsymbolprocessor
+package com.pushtorefresh.ketolang.kotlincsymbolprocessor
 
 import com.google.devtools.ksp.getClassDeclarationByName
 import com.google.devtools.ksp.isAbstract
@@ -17,7 +17,7 @@ import com.google.devtools.ksp.symbol.KSType
 import com.google.devtools.ksp.symbol.KSTypeAlias
 import com.google.devtools.ksp.symbol.Modifier
 
-class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
+class ketolangSymbolProcessor(private val environment: SymbolProcessorEnvironment) : SymbolProcessor {
 
     private lateinit var resolver: Resolver
     private val TYPE_MUTABLE_COLLECTION by lazy(LazyThreadSafetyMode.NONE) { resolver.getClassDeclarationByName("kotlin.collections.MutableCollection")!! }
@@ -28,7 +28,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     override fun process(resolver: Resolver): List<KSAnnotated> {
         this.resolver = resolver
 
-        val rikochetValidationErrors = resolver
+        val ketolangValidationErrors = resolver
             .getAllFiles()
             .flatMap { file ->
                 file
@@ -38,20 +38,20 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             .filterNotNull()
             .toList()
 
-        if (rikochetValidationErrors.isNotEmpty()) {
-            rikochetValidationErrors.forEach {
+        if (ketolangValidationErrors.isNotEmpty()) {
+            ketolangValidationErrors.forEach {
                 environment.logger.warn(
                     "${it.message}, node name = '${it.node.printableName()}'",
                     it.node
                 )
             }
-            environment.logger.error("Rikochet validation errors were found, aborting compilation!")
+            environment.logger.error("ketolang validation errors were found, aborting compilation!")
         }
 
         return emptyList()
     }
 
-    private fun validateDeclaration(declaration: KSDeclaration, resolver: Resolver): List<RikochetValidationError?> {
+    private fun validateDeclaration(declaration: KSDeclaration, resolver: Resolver): List<ketolangValidationError?> {
         return when (declaration) {
             is KSPropertyDeclaration -> listOf(validateProperty(declaration))
             is KSFunctionDeclaration -> listOf(validateFunction(declaration, resolver))
@@ -72,7 +72,7 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
 
     private fun validateProperty(
         property: KSPropertyDeclaration
-    ): RikochetValidationError? {
+    ): ketolangValidationError? {
         return when (val parentDeclaration = property.parentDeclaration) {
             is KSClassDeclaration -> {
                 when {
@@ -81,16 +81,16 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                     )
 
                     parentDeclaration.classKind == ClassKind.ENUM_CLASS -> validateEnumProperty(property)
-                    else -> RikochetValidationError(
-                        "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+                    else -> ketolangValidationError(
+                        "ketolang error: property looks suspicious! Perhaps ketolang needs an update to validate it",
                         property
                     )
                 }
             }
 
             null -> validateTopLevelProperty(property)
-            else -> RikochetValidationError(
-                "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+            else -> ketolangValidationError(
+                "ketolang error: property looks suspicious! Perhaps ketolang needs an update to validate it",
                 property
             )
         }
@@ -98,25 +98,25 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
 
     private fun validateTopLevelProperty(
         property: KSPropertyDeclaration,
-    ): RikochetValidationError? {
+    ): ketolangValidationError? {
         val type by lazy(LazyThreadSafetyMode.NONE) { property.type.resolve() }
 
         if (property.modifiers.contains(Modifier.CONST)) {
             return null
         } else if (type.isPrimitive() || type.isString()) {
-            return RikochetValidationError(
-                "Rikochet error: primitive and String properties must be declared as 'const'",
+            return ketolangValidationError(
+                "ketolang error: primitive and String properties must be declared as 'const'",
                 property
             )
         }
 
         if (property.modifiers.contains(Modifier.LATEINIT)) {
-            return RikochetValidationError("Rikochet error: lateinit properties are not allowed!", property)
+            return ketolangValidationError("ketolang error: lateinit properties are not allowed!", property)
         }
 
         if (property.isMutable) {
-            return RikochetValidationError(
-                "Rikochet error: mutable properties are not allowed!",
+            return ketolangValidationError(
+                "ketolang error: mutable properties are not allowed!",
                 property
             )
         }
@@ -125,42 +125,42 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             if (type.isImmutableCollection()) {
                 return null
             } else {
-                return RikochetValidationError(
-                    "Rikochet error: mutable collection properties are not allowed!",
+                return ketolangValidationError(
+                    "ketolang error: mutable collection properties are not allowed!",
                     property
                 )
             }
         }
 
         if (type.isArray()) {
-            return RikochetValidationError(
-                "Rikochet error: top-level array properties are not allowed because arrays are mutable",
+            return ketolangValidationError(
+                "ketolang error: top-level array properties are not allowed because arrays are mutable",
                 property
             )
         }
 
         if (property.isDelegated()) {
-            return RikochetValidationError("Rikochet error: delegated properties are not allowed!", property)
+            return ketolangValidationError("ketolang error: delegated properties are not allowed!", property)
         }
 
-        return RikochetValidationError(
-            "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+        return ketolangValidationError(
+            "ketolang error: property looks suspicious! Perhaps ketolang needs an update to validate it",
             property
         )
     }
 
     private fun validateDataClassProperty(
         property: KSPropertyDeclaration,
-    ): RikochetValidationError? {
+    ): ketolangValidationError? {
         val type by lazy(LazyThreadSafetyMode.NONE) { property.type.resolve() }
 
         if (property.modifiers.contains(Modifier.LATEINIT)) {
-            return RikochetValidationError("Rikochet error: lateinit properties are not allowed!", property)
+            return ketolangValidationError("ketolang error: lateinit properties are not allowed!", property)
         }
 
         if (property.isMutable) {
-            return RikochetValidationError(
-                "Rikochet error: mutable properties are not allowed!",
+            return ketolangValidationError(
+                "ketolang error: mutable properties are not allowed!",
                 property
             )
         }
@@ -173,58 +173,58 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             if (type.isImmutableCollection()) {
                 return null
             } else {
-                return RikochetValidationError(
-                    "Rikochet error: mutable collection properties are not allowed!",
+                return ketolangValidationError(
+                    "ketolang error: mutable collection properties are not allowed!",
                     property
                 )
             }
         }
 
         if (type.isArray()) {
-            return RikochetValidationError(
-                "Rikochet error: array properties are not allowed because arrays are mutable",
+            return ketolangValidationError(
+                "ketolang error: array properties are not allowed because arrays are mutable",
                 property
             )
         }
 
         if (property.isDelegated()) {
-            return RikochetValidationError("Rikochet error: delegated properties are not allowed!", property)
+            return ketolangValidationError("ketolang error: delegated properties are not allowed!", property)
         }
 
-        return RikochetValidationError(
-            "Rikochet error: property looks suspicious! Perhaps Rikochet needs an update to validate it",
+        return ketolangValidationError(
+            "ketolang error: property looks suspicious! Perhaps ketolang needs an update to validate it",
             property
         )
     }
 
     private fun validateEnumProperty(
         property: KSPropertyDeclaration
-    ): RikochetValidationError? {
+    ): ketolangValidationError? {
         return validateDataClassProperty(property)
     }
 
-    private fun validateTypeAlias(typeAlias: KSTypeAlias): RikochetValidationError? {
-        return RikochetValidationError("Rikochet error: type-aliases are not allowed!", typeAlias)
+    private fun validateTypeAlias(typeAlias: KSTypeAlias): ketolangValidationError? {
+        return ketolangValidationError("ketolang error: type-aliases are not allowed!", typeAlias)
     }
 
-    private fun validateFunction(function: KSFunctionDeclaration, resolver: Resolver): RikochetValidationError? {
+    private fun validateFunction(function: KSFunctionDeclaration, resolver: Resolver): ketolangValidationError? {
         return when (function.parentDeclaration) {
             is KSClassDeclaration -> validateClassFunction(function)
             null -> validateTopLevelFunction(function, resolver)
-            else -> RikochetValidationError(
-                "Rikochet error: function looks suspicious! Perhaps Rikochet needs an update to validate it",
+            else -> ketolangValidationError(
+                "ketolang error: function looks suspicious! Perhaps ketolang needs an update to validate it",
                 function
             )
         }
     }
 
-    private fun validateClassFunction(function: KSFunctionDeclaration): RikochetValidationError? {
+    private fun validateClassFunction(function: KSFunctionDeclaration): ketolangValidationError? {
         if (function.isConstructor()) {
             // TODO: validate constructors too.
             return null
         } else {
-            return RikochetValidationError(
-                "Rikochet error: functions in classes are not allowed!",
+            return ketolangValidationError(
+                "ketolang error: functions in classes are not allowed!",
                 function
             )
         }
@@ -233,35 +233,35 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
     private fun validateTopLevelFunction(
         function: KSFunctionDeclaration,
         resolver: Resolver
-    ): RikochetValidationError? {
+    ): ketolangValidationError? {
         if (function.modifiers.contains(Modifier.SUSPEND)) {
-            return RikochetValidationError("Rikochet error: suspend functions are not allowed!", function)
+            return ketolangValidationError("ketolang error: suspend functions are not allowed!", function)
         }
 
         val returnType = function.returnType!!.resolve()
 
         if (returnType == resolver.builtIns.unitType) {
-            return RikochetValidationError("Rikochet error: functions returning Unit are not allowed!", function)
+            return ketolangValidationError("ketolang error: functions returning Unit are not allowed!", function)
         }
 
         if (returnType.declaration == TYPE_ANY) {
-            return RikochetValidationError("Rikochet error: functions returning Any are not allowed!", function)
+            return ketolangValidationError("ketolang error: functions returning Any are not allowed!", function)
         }
 
         if (returnType.isCollection()) {
             if (returnType.isImmutableCollection()) {
                 return null
             } else {
-                return RikochetValidationError(
-                    "Rikochet error: functions returning mutable collections are not allowed!",
+                return ketolangValidationError(
+                    "ketolang error: functions returning mutable collections are not allowed!",
                     function
                 )
             }
         }
 
         if (function.parameters.isEmpty()) {
-            return RikochetValidationError(
-                "Rikochet error: functions without parameters are not allowed!",
+            return ketolangValidationError(
+                "ketolang error: functions without parameters are not allowed!",
                 function
             )
         }
@@ -270,21 +270,21 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
                 .all { it.isPrimitive() || it.isString() || it.isImmutableCollection() }) {
             return null
         } else {
-            return RikochetValidationError(
-                "Rikochet error: functions accepting mutable parameters are not allowed!",
+            return ketolangValidationError(
+                "ketolang error: functions accepting mutable parameters are not allowed!",
                 function
             )
         }
 
-        /*return RikochetValidationError(
-            "Rikochet error: function looks suspicious! Perhaps Rikochet needs an update to validate it.",
+        /*return ketolangValidationError(
+            "ketolang error: function looks suspicious! Perhaps ketolang needs an update to validate it.",
             function
         )*/
     }
 
-    private fun validateClass(clazz: KSClassDeclaration): RikochetValidationError? {
+    private fun validateClass(clazz: KSClassDeclaration): ketolangValidationError? {
         if (clazz.isAbstract()) {
-            return RikochetValidationError("Rikochet error: abstract classes and interfaces are not allowed!", clazz)
+            return ketolangValidationError("ketolang error: abstract classes and interfaces are not allowed!", clazz)
         }
 
         if (clazz.modifiers.size == 1 && clazz.modifiers.contains(Modifier.DATA)) {
@@ -293,8 +293,8 @@ class RikochetSymbolProcessor(private val environment: SymbolProcessorEnvironmen
             return null
         }
 
-        return RikochetValidationError(
-            "Rikochet error: regular classes are not allowed, only data classes and enums are allowed!",
+        return ketolangValidationError(
+            "ketolang error: regular classes are not allowed, only data classes and enums are allowed!",
             clazz
         )
     }

@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlinsymbolprocessor
+package com.pushtorefresh.ketolang.kotlinsymbolprocessor
 
 import com.tschuchort.compiletesting.KotlinCompilation.ExitCode
 import com.tschuchort.compiletesting.SourceFile
@@ -21,7 +21,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -38,7 +38,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -67,7 +67,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -84,7 +84,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -113,7 +113,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -130,7 +130,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -159,7 +159,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -176,7 +176,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -205,7 +205,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -222,7 +222,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 

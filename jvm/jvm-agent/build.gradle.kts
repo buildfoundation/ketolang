@@ -9,7 +9,7 @@ dependencies {
 
 tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
     manifest {
-        attributes("Premain-class" to "com.pushtorefresh.rikochet.jvmagent.RikochetJvmAgent")
+        attributes("Premain-class" to "com.pushtorefresh.ketolang.jvmagent.ketolangJvmAgent")
         attributes("Can-Redefine-Classes" to true)
         attributes("Can-Retransform-Classes" to true)
     }

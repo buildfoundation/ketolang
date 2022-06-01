@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.jvmagent
+package com.pushtorefresh.ketolang.jvmagent
 
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.agent.builder.AgentBuilder.InitializationStrategy
@@ -12,7 +12,7 @@ import net.bytebuddy.matcher.ElementMatchers.named
 import java.lang.instrument.Instrumentation
 import kotlin.system.exitProcess
 
-class RikochetJvmAgent {
+class ketolangJvmAgent {
     companion object {
         @JvmStatic
         fun premain(@Suppress("UNUSED_PARAMETER") agentArgs: String?, instrumentation: Instrumentation) {

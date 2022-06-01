@@ -4,7 +4,7 @@ set -euo pipefail
 # Run from top-level project root.
 ./gradlew :kotlinc:ksp-validator:assemble
 
-cd samples/native
+cd samples/cli
 
 mkdir -p build/cli-sample
 cd build/cli-sample
@@ -49,6 +49,7 @@ KSP_PLUGIN_OPT=plugin:$KSP_PLUGIN_ID
 KSP_PLUGIN_JAR=./com/google/devtools/ksp/symbol-processing-cmdline/$KSP_VERSION/symbol-processing-cmdline-$KSP_VERSION.jar
 KSP_API_JAR=./com/google/devtools/ksp/symbol-processing-api/$KSP_VERSION/symbol-processing-api-$KSP_VERSION.jar
 KOTLINC=./kotlinc/bin/kotlinc
+KOTLINC_NATIVE=./kotlin-native-macos-aarch64-$KOTLINC_VERSION/bin/kotlinc-native
 
 AP=../../../../kotlinc/ksp-validator/build/libs/ksp-validator.jar
 
@@ -57,6 +58,7 @@ mkdir ksp-out
 mkdir kotlinc-out
 
 set -x
+echo "Validating the code..."
 $KOTLINC \
         -Xplugin=$KSP_PLUGIN_JAR \
         -Xplugin=$KSP_API_JAR \
@@ -69,6 +71,23 @@ $KOTLINC \
         -P $KSP_PLUGIN_OPT:kspOutputDir=./ksp-out \
         -P $KSP_PLUGIN_OPT:cachesDir=./ksp-out \
         -P $KSP_PLUGIN_OPT:incremental=false \
-        -d kotlinc-out/result-jvm.zip \
+        -no-stdlib \
+        -no-reflect \
         -no-jdk \
-        ../../src/main/kotlin/com/pushtorefresh/rikochet/sample/Sample.kt
+        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/Sample.kt
+
+echo "Compiling for JVM..."
+$KOTLINC \
+        -no-reflect \
+        -no-stdlib \
+        -no-jdk \
+        -d kotlinc-out/result.jar \
+        ../../src/main/kotlin/kotlin/String.kt \
+        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/Sample.kt
+
+echo "Compiling for Native..."
+$KOTLINC_NATIVE \
+        -nomain \
+        -produce library \
+        -output kotlinc-out/result.bin \
+        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/Sample.kt

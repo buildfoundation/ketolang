@@ -6,11 +6,11 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-group = "com.pushtorefresh.rikochet.dummyapp"
+group = "com.pushtorefresh.ketolang.dummyapp"
 version = "dev"
 
 application {
-    mainClass.set("com.pushtorefresh.rikochet.dummyapp.Main-${System.currentTimeMillis()}")
+    mainClass.set("com.pushtorefresh.ketolang.dummyapp.Main-${System.currentTimeMillis()}")
 }
 
 tasks.withType<KotlinCompile> {

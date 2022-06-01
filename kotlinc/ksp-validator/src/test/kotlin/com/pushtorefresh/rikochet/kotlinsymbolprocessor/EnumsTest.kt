@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlinsymbolprocessor
+package com.pushtorefresh.ketolang.kotlinsymbolprocessor
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -36,7 +36,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: mutable properties are not allowed!, node name = 'a'"
+            "ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -82,7 +82,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: mutable properties are not allowed!, node name = 'a'"
+            "ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -100,7 +100,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: mutable properties are not allowed!, node name = 'a'"
+            "ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -118,7 +118,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: mutable properties are not allowed!, node name = 'a'"
+            "ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 }

@@ -1,6 +1,6 @@
 @file:JvmName("Main")
 
-package com.pushtorefresh.rikochet.dummyapp
+package com.pushtorefresh.ketolang.dummyapp
 
 
 const val constValInt = 1

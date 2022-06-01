@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlinsymbolprocessor
+package com.pushtorefresh.ketolang.kotlinsymbolprocessor
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -23,7 +23,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions returning Unit are not allowed!, node name = 'f'"
+            "ketolang error: functions returning Unit are not allowed!, node name = 'f'"
         )
     }
 
@@ -42,7 +42,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions returning Any are not allowed!, node name = 'f'"
+            "ketolang error: functions returning Any are not allowed!, node name = 'f'"
         )
     }
 
@@ -61,7 +61,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions without parameters are not allowed!, node name = 'f'"
+            "ketolang error: functions without parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -80,7 +80,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -141,7 +141,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -160,7 +160,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -179,7 +179,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: suspend functions are not allowed!, node name = 'f'"
+            "ketolang error: suspend functions are not allowed!, node name = 'f'"
         )
     }
 }

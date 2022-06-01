@@ -1,5 +1,5 @@
-package com.pushtorefresh.rikochet.kotlincsymbolprocessor
+package com.pushtorefresh.ketolang.kotlincsymbolprocessor
 
 import com.google.devtools.ksp.symbol.KSNode
 
-data class RikochetValidationError(val message: String, val node: KSNode)
+data class ketolangValidationError(val message: String, val node: KSNode)

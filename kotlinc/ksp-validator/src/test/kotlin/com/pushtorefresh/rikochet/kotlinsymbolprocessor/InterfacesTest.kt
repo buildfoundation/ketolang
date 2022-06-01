@@ -1,4 +1,4 @@
-package com.pushtorefresh.rikochet.kotlinsymbolprocessor
+package com.pushtorefresh.ketolang.kotlinsymbolprocessor
 
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
@@ -23,7 +23,7 @@ class InterfacesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: abstract classes and interfaces are not allowed!, node name = 'I'"
+            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'I'"
         )
     }
 
@@ -42,7 +42,7 @@ class InterfacesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Rikochet error: abstract classes and interfaces are not allowed!, node name = 'A'"
+            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'A'"
         )
     }
 }

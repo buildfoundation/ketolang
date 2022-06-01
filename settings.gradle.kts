@@ -1,4 +1,4 @@
-rootProject.name = "rikochet"
+rootProject.name = "ketolang"
 
 include(":jvm:jvm-agent")
 include(":jvm:dummy-app")
