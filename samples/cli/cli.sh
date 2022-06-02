@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Run from top-level project root.
-./gradlew :kotlinc:compiler-plugin:assemble
+./gradlew :kotlinc:compiler-plugin-standalone:assemble
 
 cd samples/cli
 
@@ -34,7 +34,7 @@ fi
 KOTLINC=./kotlinc/bin/kotlinc
 KOTLINC_NATIVE=./kotlin-native-macos-aarch64-$KOTLINC_VERSION/bin/kotlinc-native
 
-KETOLANG_KOTLINC_PLUGIN_JAR=../../../../kotlinc/compiler-plugin/build/libs/compiler-plugin.jar
+KETOLANG_KOTLINC_PLUGIN_JAR=../../../../kotlinc/compiler-plugin-standalone/build/libs/compiler-plugin.jar
 
 rm -rf kotlinc-out
 mkdir kotlinc-out

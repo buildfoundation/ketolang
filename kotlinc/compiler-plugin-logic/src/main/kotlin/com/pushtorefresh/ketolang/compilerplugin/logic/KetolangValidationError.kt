@@ -1,4 +1,4 @@
-package com.pushtorefresh.ketolang.compilerplugin
+package com.pushtorefresh.ketolang.compilerplugin.logic
 
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation

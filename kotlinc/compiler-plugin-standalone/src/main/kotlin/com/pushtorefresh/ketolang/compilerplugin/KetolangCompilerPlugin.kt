@@ -1,6 +1,7 @@
 package com.pushtorefresh.ketolang.compilerplugin
 
 import com.intellij.mock.MockProject
+import com.pushtorefresh.ketolang.compilerplugin.logic.KetolangIrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.CLIConfigurationKeys
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector

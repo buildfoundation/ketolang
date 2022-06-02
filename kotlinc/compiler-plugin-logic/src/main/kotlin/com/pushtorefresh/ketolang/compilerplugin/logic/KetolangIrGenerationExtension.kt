@@ -1,4 +1,4 @@
-package com.pushtorefresh.ketolang.compilerplugin
+package com.pushtorefresh.ketolang.compilerplugin.logic
 
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext

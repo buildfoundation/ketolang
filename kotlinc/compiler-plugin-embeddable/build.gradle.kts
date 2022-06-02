@@ -3,7 +3,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler:${deps.kotlin}")
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:${deps.kotlin}")
+    implementation(project(":kotlinc:compiler-plugin-logic"))
 }
 
 dependencies {

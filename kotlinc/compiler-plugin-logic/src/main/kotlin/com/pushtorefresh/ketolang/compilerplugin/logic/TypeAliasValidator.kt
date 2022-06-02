@@ -1,4 +1,4 @@
-package com.pushtorefresh.ketolang.compilerplugin
+package com.pushtorefresh.ketolang.compilerplugin.logic
 
 import org.jetbrains.kotlin.ir.declarations.impl.IrTypeAliasImpl
 
