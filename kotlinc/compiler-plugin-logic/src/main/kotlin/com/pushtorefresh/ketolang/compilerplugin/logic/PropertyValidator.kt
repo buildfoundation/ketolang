@@ -73,12 +73,15 @@ private fun validateTopLevelProperty(
 
     errors += when {
         (type?.classOrNull?.descriptor?.isData == true) -> emptyList()
-        (type?.isSomeCollection(moduleFragment) == true && !type?.isImmutableCollection(moduleFragment)) -> listOf(
-            KetolangValidationError(
-                "Ketolang error: mutable collection properties are not allowed!",
-                property
+        (type?.isSomeCollection(moduleFragment) == true) -> {
+            if (type.isImmutableCollection(moduleFragment)) emptyList()
+            else listOf(
+                KetolangValidationError(
+                    "Ketolang error: mutable collection properties are not allowed!",
+                    property
+                )
             )
-        )
+        }
 
         (type?.isArray() == true) -> listOf(
             KetolangValidationError(
@@ -132,12 +135,15 @@ private fun validateDataClassProperty(
                 || type?.classOrNull?.descriptor?.isData == true
                 ) -> emptyList()
 
-        (type?.isSomeCollection(moduleFragment) == true && !type.isImmutableCollection(moduleFragment)) -> listOf(
-            KetolangValidationError(
-                "Ketolang error: mutable collection properties are not allowed!",
-                property
+        (type?.isSomeCollection(moduleFragment) == true) -> {
+            if (type.isImmutableCollection(moduleFragment)) emptyList()
+            else listOf(
+                KetolangValidationError(
+                    "Ketolang error: mutable collection properties are not allowed!",
+                    property
+                )
             )
-        )
+        }
 
         type?.isArray() == true -> listOf(
             KetolangValidationError(

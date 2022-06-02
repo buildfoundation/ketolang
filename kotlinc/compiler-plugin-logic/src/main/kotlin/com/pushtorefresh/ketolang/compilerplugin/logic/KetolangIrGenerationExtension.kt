@@ -42,9 +42,9 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         declaration: IrDeclaration
     ): List<Pair<IrFile, KetolangValidationError?>> {
         return when (declaration) {
-            is IrPropertyImpl -> listOf(validateProperty(moduleFragment, declaration))
+            is IrPropertyImpl -> validateProperty(moduleFragment, declaration)
             is IrFunctionImpl -> validateFunction(moduleFragment, declaration)
-            is IrTypeAliasImpl -> listOf(validateTypeAlias(declaration))
+            is IrTypeAliasImpl -> validateTypeAlias(declaration)
             is IrClassImpl -> {
                 validateClass(declaration).let { error ->
                     if (error == null) {
