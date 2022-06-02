@@ -17,7 +17,6 @@ class KetolangCommandLineProcessor : CommandLineProcessor {
 class KetolangComponentRegistrar : ComponentRegistrar {
     override fun registerProjectComponents(project: MockProject, configuration: CompilerConfiguration) {
         val messageCollector = configuration.get(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, MessageCollector.NONE)
-        //ClassFileFactoryFinalizerExtension.registerExtension(project, KetolangClassFileFactoryFinalizerExtension())
         IrGenerationExtension.registerExtension(project, KetolangIrGenerationExtension(messageCollector))
     }
 }

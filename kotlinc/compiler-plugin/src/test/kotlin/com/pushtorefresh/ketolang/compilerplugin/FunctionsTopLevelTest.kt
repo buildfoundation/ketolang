@@ -127,6 +127,22 @@ class FunctionsTopLevelTest {
     }
 
     @Test
+    fun `List(data class) parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            data class D(val i: Int)
+
+            fun f(b: List<D>): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `List(Any) parameter is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """

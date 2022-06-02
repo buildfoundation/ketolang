@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrTypeAliasImpl
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.getPublicSignature
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
@@ -258,6 +259,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             return null
         } else if (function.origin is IrDeclarationOrigin.ENUM_CLASS_SPECIAL_MEMBER) {
             return null
+        } else if (function.origin is IrDeclarationOrigin.GENERATED_DATA_CLASS_MEMBER) {
+            return null
         } else {
             return KetolangValidationError(
                 "Ketolang error: functions in classes are not allowed!",
@@ -345,6 +348,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
                 || isSubtypeOfClass(moduleFragment.irBuiltins.mutableMapClass)
     }
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun IrType.isImmutableCollection(): Boolean {
         val signature = classifierOrFail.signature
 
@@ -360,7 +364,9 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
 
         return arguments.all {
             val type = it.typeOrNull!!
-            type.isPrimitiveType() || type.isString()
+            type.isPrimitiveType()
+                    || type.isString()
+                    || type.classOrNull?.descriptor?.isData == true
         }
     }
 

@@ -50,6 +50,20 @@ class CollectionTopLevelPropertiesTest {
     }
 
     @Test
+    fun `val List(data class) is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            data class D(val i: Int)
+
+            val b: List<D> = listOf()
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `val List(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
