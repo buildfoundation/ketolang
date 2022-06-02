@@ -36,7 +36,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'a'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -82,7 +82,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'a'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -100,7 +100,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'a'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 
@@ -118,7 +118,7 @@ class EnumsTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'a'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'a'"
         )
     }
 }

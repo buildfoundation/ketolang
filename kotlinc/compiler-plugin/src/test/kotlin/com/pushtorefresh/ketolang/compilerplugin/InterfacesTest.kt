@@ -23,7 +23,7 @@ class InterfacesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'I'"
+            "Ketolang error: abstract classes and interfaces are not allowed!, node name = 'I'"
         )
     }
 
@@ -42,7 +42,7 @@ class InterfacesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'A'"
+            "Ketolang error: abstract classes and interfaces are not allowed!, node name = 'A'"
         )
     }
 }

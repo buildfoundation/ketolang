@@ -25,7 +25,7 @@ class FunctionsInClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: functions in classes are not allowed!, node name = 'f'"
+            "Ketolang error: functions in classes are not allowed!, node name = 'f'"
         )
     }
 
@@ -48,7 +48,7 @@ class FunctionsInClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: functions in classes are not allowed!, node name = 'f'"
+            "Ketolang error: functions in classes are not allowed!, node name = 'f'"
         )
     }
 
@@ -69,7 +69,7 @@ class FunctionsInClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: regular classes are not allowed, only data classes and enums are allowed!, node name = 'C'"
+            "Ketolang error: regular classes are not allowed, only data classes and enums are allowed!, node name = 'C'"
         )
     }
 
@@ -90,7 +90,7 @@ class FunctionsInClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'I'"
+            "Ketolang error: abstract classes and interfaces are not allowed!, node name = 'I'"
         )
     }
 
@@ -111,7 +111,7 @@ class FunctionsInClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: abstract classes and interfaces are not allowed!, node name = 'C'"
+            "Ketolang error: abstract classes and interfaces are not allowed!, node name = 'C'"
         )
     }
 }

@@ -21,7 +21,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -62,7 +62,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -79,7 +79,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -96,7 +96,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -137,7 +137,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -154,7 +154,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -171,7 +171,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -212,7 +212,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -229,7 +229,7 @@ class CollectionTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable collection properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable collection properties are not allowed!, node name = 'b'"
         )
     }
 }

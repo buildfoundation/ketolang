@@ -23,7 +23,7 @@ class Test {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: suspend functions are not allowed!, node name = 'f'"
+            "Ketolang error: suspend functions are not allowed!, node name = 'f'"
         )
     }
 }

@@ -21,7 +21,7 @@ class ArrayTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: mutable properties are not allowed!, node name = 'b'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'b'"
         )
     }
 
@@ -38,7 +38,7 @@ class ArrayTopLevelPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: top-level array properties are not allowed because arrays are mutable, node name = 'b'"
+            "Ketolang error: top-level array properties are not allowed because arrays are mutable, node name = 'b'"
         )
     }
 }

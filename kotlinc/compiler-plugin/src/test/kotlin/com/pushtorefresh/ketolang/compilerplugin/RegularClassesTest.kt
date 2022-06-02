@@ -23,7 +23,7 @@ class RegularClassesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: regular classes are not allowed, only data classes and enums are allowed!, node name = 'C'"
+            "Ketolang error: regular classes are not allowed, only data classes and enums are allowed!, node name = 'C'"
         )
     }
 }

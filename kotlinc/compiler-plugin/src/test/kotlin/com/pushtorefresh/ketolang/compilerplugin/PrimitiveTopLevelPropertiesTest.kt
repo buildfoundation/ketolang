@@ -21,7 +21,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -38,7 +38,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -67,7 +67,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -84,7 +84,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -113,7 +113,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -130,7 +130,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -159,7 +159,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -176,7 +176,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -205,7 +205,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
@@ -222,7 +222,7 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
         )
     }
 
