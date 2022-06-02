@@ -1,7 +1,8 @@
 >The future of general purpose _configuration_ languages.
 
 Ketolang is a dialect of Kotlin without side-effects, it allows only data-classes and pure functions. 
-Ketolang aims to cover use-cases of Starlark language but in compile-time type-safe environment of Kotlin and with benefit of running in more performant environment than an interpreter (JVM, Native).
+
+Ketolang aims to cover use-cases of Starlark language but in compile-time, type-safe environment of Kotlin, with benefit of running in more performant environment than an interpreter (JVM, Native).
 
 List of restricted Kotlin functionality (each option has feature flag to enable/disable it):
 
@@ -15,7 +16,7 @@ List of restricted Kotlin functionality (each option has feature flag to enable/
 - [x] Delegated properties are not allowed
 - [x] Type aliases are not allowed
 - Type casting is not allowed (ie casting List to MutableList to get to mutable state)
-- Classes and interfaces are not allowed, however data classes are allowed
+- Regular classes and interfaces are not allowed, however data classes are allowed
 
 ## FAQ
 
@@ -32,7 +33,7 @@ Q: What Kotlin runtime environments does Ketolang support?
 A: JVM, we're working on Kotlin Native too, JS is out of scope right now but may be supported if someone can take a lead.
 
 Q: How does Ketolang implement its restrictiveness?
-A: Ketolang restricts Kotlin language and access to its stdlib at compile time via compile plugin (KSP).
+A: Ketolang restricts Kotlin language and access Kotlin stdlib at compile time via compile plugin.
 
 Q: Is it possible to use libraries with Ketolang?
-A: Yes! But with a caveat: libraries should be included as sources to support JVM and Native environments and to verify that libraries don't violate Ketolang restrictions. However, if desired by integration logic — libraries of course can provide their API for side-effects in a controlled manner. This is how Starlark is integrated into Bazel.
+A: Yes! Libraries should be included as sources to support JVM and Native environments and to verify that libraries don't violate Ketolang restrictions. However, if desired by integrating system — libraries of course can be linked dynamically to provide their API for side-effects in a controlled manner. This is how Starlark is integrated into Bazel, it includes Starlark and provides Bazel Starlark library on top.

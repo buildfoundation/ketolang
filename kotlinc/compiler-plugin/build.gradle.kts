@@ -3,7 +3,7 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:${deps.kotlin}")
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler:${deps.kotlin}")
 }
 
 dependencies {
