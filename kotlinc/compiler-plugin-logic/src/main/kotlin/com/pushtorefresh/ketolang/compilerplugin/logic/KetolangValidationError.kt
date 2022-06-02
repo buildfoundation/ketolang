@@ -25,6 +25,7 @@ fun IrFile.locationOf(irElement: IrElement?): CompilerMessageSourceLocation {
         beginOffset = irElement?.startOffset ?: SYNTHETIC_OFFSET,
         endOffset = irElement?.endOffset ?: SYNTHETIC_OFFSET
     )
+    @Suppress("UnsafeCallOnNullableType")
     return CompilerMessageLocationWithRange.create(
         path = sourceRangeInfo.filePath,
         lineStart = sourceRangeInfo.startLineNumber + 1,

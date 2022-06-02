@@ -25,8 +25,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             ketolangValidationErrors.forEach { (file, error) ->
                 messageCollector.report(
                     CompilerMessageSeverity.ERROR,
-                    "${error!!.message}, node name = '${error.location.printableName()}'",
-                    file.locationOf(error.location)
+                    "${error?.message}, node name = '${error?.location?.printableName()}'",
+                    file.locationOf(error?.location)
                 )
             }
             messageCollector.report(

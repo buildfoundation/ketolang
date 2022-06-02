@@ -41,11 +41,11 @@ private fun validateTopLevelProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl,
 ): KetolangValidationError? {
-    val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField!!.type }
+    val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField?.type }
 
     if (property.isConst) {
         return null
-    } else if (type.isPrimitiveType() || type.isString()) {
+    } else if (type?.isPrimitiveType() == true || type?.isString() == true) {
         return KetolangValidationError(
             "Ketolang error: primitive and String properties must be declared as 'const'",
             property
@@ -63,13 +63,13 @@ private fun validateTopLevelProperty(
         )
     }
 
-    if (type.classOrNull?.descriptor?.isData == true) {
+    if (type?.classOrNull?.descriptor?.isData == true) {
         return null
     }
 
     // TODO fix isCollection to actually check if is assignable from
-    if (type.isSomeCollection(moduleFragment)) {
-        if (type.isImmutableCollection(moduleFragment)) {
+    if (type?.isSomeCollection(moduleFragment) == true) {
+        if (type?.isImmutableCollection(moduleFragment) == true) {
             return null
         } else {
             return KetolangValidationError(
@@ -79,7 +79,7 @@ private fun validateTopLevelProperty(
         }
     }
 
-    if (type.isArray()) {
+    if (type?.isArray() == true) {
         return KetolangValidationError(
             "Ketolang error: top-level array properties are not allowed because arrays are mutable",
             property
@@ -101,7 +101,7 @@ private fun validateDataClassProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl,
 ): KetolangValidationError? {
-    val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField!!.type }
+    val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField?.type }
 
     if (property.isLateinit) {
         return KetolangValidationError("Ketolang error: lateinit properties are not allowed!", property)
@@ -114,12 +114,15 @@ private fun validateDataClassProperty(
         )
     }
 
-    if (type.isPrimitiveType() || type.isString() || type.classOrNull?.descriptor?.isData == true) {
+    if (type?.isPrimitiveType() == true
+        || type?.isString() == true
+        || type?.classOrNull?.descriptor?.isData == true
+    ) {
         return null
     }
 
-    if (type.isSomeCollection(moduleFragment)) {
-        if (type.isImmutableCollection(moduleFragment)) {
+    if (type?.isSomeCollection(moduleFragment) == true) {
+        if (type?.isImmutableCollection(moduleFragment) == true) {
             return null
         } else {
             return KetolangValidationError(
@@ -129,7 +132,7 @@ private fun validateDataClassProperty(
         }
     }
 
-    if (type.isArray()) {
+    if (type?.isArray() == true) {
         return KetolangValidationError(
             "Ketolang error: array properties are not allowed because arrays are mutable",
             property
@@ -150,7 +153,12 @@ private fun validateEnumProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl
 ): KetolangValidationError? {
-    if (property.backingField == null && (property.name.asString() == "name" || property.name.asString() == "ordinal")) {
+    if (property.backingField == null
+        && (
+                property.name.asString() == "name"
+                        || property.name.asString() == "ordinal"
+                )
+    ) {
         return null
     } else {
         return validateDataClassProperty(moduleFragment, property)

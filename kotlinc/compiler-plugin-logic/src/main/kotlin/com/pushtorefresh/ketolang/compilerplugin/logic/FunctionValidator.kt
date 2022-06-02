@@ -30,7 +30,7 @@ fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl)
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateClassFunction(function: IrFunctionImpl): KetolangValidationError? {
     if (function.descriptor is IrConstructor) {
-        // TODO: validate constructors too.
+        // Do we need additional constructor validation?
         return null
     } else if (!function.isReal) {
         // Auto-generated functions such as "clone", "finalize" and such.
@@ -86,7 +86,12 @@ private fun validateTopLevelFunction(
     }
 
     if (function.allParameters.map { it.type }
-            .all { it.isPrimitiveType() || it.isString() || it.classOrNull?.descriptor?.isData == true || it.isImmutableCollection(moduleFragment) }) {
+            .all {
+                it.isPrimitiveType()
+                        || it.isString()
+                        || it.classOrNull?.descriptor?.isData == true
+                        || it.isImmutableCollection(moduleFragment)
+            }) {
         return null
     } else {
         return KetolangValidationError(

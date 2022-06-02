@@ -31,8 +31,8 @@ fun IrType.isImmutableCollection(@Suppress("UNUSED_PARAMETER") moduleFragment: I
 
     (this as IrSimpleTypeImpl);
 
-    return arguments.all {
-        val type = it.typeOrNull
+    return arguments.all { argument ->
+        val type = argument.typeOrNull
         type?.isPrimitiveType() == true
                 || type?.isString() == true
                 || type?.classOrNull?.descriptor?.isData == true

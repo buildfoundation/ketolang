@@ -42,6 +42,8 @@ style:
     active: false
   OptionalWhenBraces:
     active: false
+  ReturnCount:
+    active: false
 
 naming:
   TopLevelPropertyNaming:
@@ -56,6 +58,12 @@ complexity:
     active: false
   NamedArguments:
     threshold: 4
+  ComplexCondition:
+    active: false
+  ReplaceSafeCallChainWithRun:
+    active: false
+  StringLiteralDuplication:
+    active: false
 
 coroutines:
   InjectDispatcher:
