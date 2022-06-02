@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isCollection
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
@@ -38,12 +39,17 @@ import org.jetbrains.kotlin.ir.util.isEnumEntry
 import org.jetbrains.kotlin.ir.util.isInterface
 
 class KetolangIrGenerationExtension(private val messageCollector: MessageCollector) : IrGenerationExtension {
-    override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
 
+    private val SIGNATURE_LIST = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "List")
+    private val SIGNATURE_SET = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Set")
+    private val SIGNATURE_MAP = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Map")
+    private val SIGNATURE_MUTABLE_MAP = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "MutableMap")
+
+    override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
         val ketolangValidationErrors = moduleFragment
             .files
             .flatMap { file -> file.declarations.map { file to it } }
-            .flatMap { (file, declaration) -> validateDeclaration(file, declaration) }
+            .flatMap { (file, declaration) -> validateDeclaration(moduleFragment, file, declaration) }
             .filter { (_, error) -> error != null }
 
         if (ketolangValidationErrors.isNotEmpty()) {
@@ -62,22 +68,23 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateDeclaration(
+        moduleFragment: IrModuleFragment,
         file: IrFile,
         declaration: IrDeclaration
     ): List<Pair<IrFile, KetolangValidationError?>> {
         return when (declaration) {
-            is IrPropertyImpl -> listOf(validateProperty(declaration))
-            is IrFunctionImpl -> listOf(validateFunction(declaration))
+            is IrPropertyImpl -> listOf(validateProperty(moduleFragment, declaration))
+            is IrFunctionImpl -> listOf(validateFunction(moduleFragment, declaration))
             is IrTypeAliasImpl -> listOf(validateTypeAlias(declaration))
             is IrClassImpl -> {
-                validateClass(declaration).let {
-                    if (it == null) {
+                validateClass(declaration).let { error ->
+                    if (error == null) {
                         declaration
                             .declarations
-                            .flatMap { validateDeclaration(file, it).map { (_, error) -> error } }
+                            .flatMap { validateDeclaration(moduleFragment, file, it).map { (_, error) -> error } }
                             .toList()
                     } else {
-                        listOf(it)
+                        listOf(error)
                     }
                 }
             }
@@ -87,6 +94,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateProperty(
+        moduleFragment: IrModuleFragment,
         property: IrPropertyImpl
     ): KetolangValidationError? {
         val parent = property.parent
@@ -105,7 +113,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
                 }
             }
 
-            property.isTopLevel -> validateTopLevelProperty(property)
+            property.isTopLevel -> validateTopLevelProperty(moduleFragment, property)
             else -> KetolangValidationError(
                 "Ketolang error: property looks suspicious! Perhaps Ketolang needs an update to validate it",
                 property
@@ -115,6 +123,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
 
     @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun validateTopLevelProperty(
+        moduleFragment: IrModuleFragment,
         property: IrPropertyImpl,
     ): KetolangValidationError? {
         val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField!!.type }
@@ -139,7 +148,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             )
         }
 
-        if (type.isCollection()) {
+        // TODO fix isCollection to actually check if is assignable from
+        if (type.isSomeCollection(moduleFragment)) {
             if (type.isImmutableCollection()) {
                 return null
             } else {
@@ -218,10 +228,14 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     private fun validateEnumProperty(
         property: IrPropertyImpl
     ): KetolangValidationError? {
-        return validateDataClassProperty(property)
+        if (property.backingField == null && (property.name.asString() == "name" || property.name.asString() == "ordinal")) {
+            return null
+        } else {
+            return validateDataClassProperty(property)
+        }
     }
 
-    private fun validateFunction(function: IrFunctionImpl): KetolangValidationError? {
+    private fun validateFunction(@Suppress("UNUSED_PARAMETER") moduleFragment: IrModuleFragment, function: IrFunctionImpl): KetolangValidationError? {
         return when {
             function.parent is IrClassImpl -> validateClassFunction(function)
             function.isTopLevel -> validateTopLevelFunction(function)
@@ -316,6 +330,11 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         )
     }
 
+    private fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
+        return isSubtypeOfClass(moduleFragment.irBuiltins.collectionClass)
+                || classifierOrFail.signature == SIGNATURE_MUTABLE_MAP
+    }
+
     private fun IrType.isImmutableCollection(): Boolean {
         val signature = classifierOrFail.signature
 
@@ -356,11 +375,5 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             is IrFunctionImpl -> name.asString()
             else -> "no printable name"
         }
-    }
-
-    companion object {
-        val SIGNATURE_LIST = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "List")
-        val SIGNATURE_SET = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Set")
-        val SIGNATURE_MAP = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Map")
     }
 }
