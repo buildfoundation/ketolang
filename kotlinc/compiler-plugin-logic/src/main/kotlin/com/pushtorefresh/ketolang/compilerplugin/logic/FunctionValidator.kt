@@ -92,6 +92,8 @@ private fun validateTopLevelFunction(
                         || it.isImmutableCollection(moduleFragment)
             }) {
         errors += KetolangValidationError(
+            // "Ketolang error: functions accepting \"mutable\" parameters are not allowed!
+            // Allowed parameters: primitives, String, data classes, enums and collections of these.",
             "Ketolang error: functions accepting mutable parameters are not allowed!",
             function
         )

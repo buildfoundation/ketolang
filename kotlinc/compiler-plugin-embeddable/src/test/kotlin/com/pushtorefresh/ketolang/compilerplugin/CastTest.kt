@@ -85,4 +85,65 @@ class CastTest {
             "Ketolang error: explicit casting is prohibited!, node name = 'no printable name'"
         )
     }
+
+    @Test
+    fun `explicit casting in function via generics is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            fun <T> List<*>.okay() = this as T
+            val l1 : List<String> = mutableListOf()
+            fun f(i: Int): Int {
+                l1.okay<MutableList<String>>().add("abc")
+                return i
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'okay'"
+        )
+    }
+
+    @Test
+    fun `casting in function via reflection is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            inline fun <reified T: Any, V: Any> List<V>.okay() = T::class.cast(this)
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Unresolved reference: cast"
+        )
+    }
+
+    @Test
+    fun `casting in inline function is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            inline fun <reified T: Any, V: Any> List<V>.okay() = this as T
+            fun lol(i: Int): Int {
+                val l1 : List<String> = mutableListOf()
+                l1.okay<MutableList<String>, String>().add("abc")
+                return i
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'okay'"
+        )
+    }
 }
