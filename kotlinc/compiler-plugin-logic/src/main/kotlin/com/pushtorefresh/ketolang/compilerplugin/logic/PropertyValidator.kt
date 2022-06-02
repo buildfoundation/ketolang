@@ -5,6 +5,7 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
+import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
@@ -74,13 +75,16 @@ private fun validateTopLevelProperty(
     errors += when {
         (type?.classOrNull?.descriptor?.isData == true) -> emptyList()
         (type?.isSomeCollection(moduleFragment) == true) -> {
-            if (type.isImmutableCollection(moduleFragment)) emptyList()
-            else listOf(
-                KetolangValidationError(
-                    "Ketolang error: mutable collection properties are not allowed!",
-                    property
+            if (type.isImmutableCollection(moduleFragment)) {
+                emptyList()
+            } else {
+                listOf(
+                    KetolangValidationError(
+                        "Ketolang error: mutable collection properties are not allowed!",
+                        property
+                    )
                 )
-            )
+            }
         }
 
         (type?.isArray() == true) -> listOf(
@@ -105,6 +109,11 @@ private fun validateTopLevelProperty(
         )
     }
 
+    val initializer: IrExpressionBody? = property.backingField?.initializer
+
+    if (initializer != null) {
+        errors += validateExpression(initializer)
+    }
 
     return errors
 }
@@ -136,13 +145,16 @@ private fun validateDataClassProperty(
                 ) -> emptyList()
 
         (type?.isSomeCollection(moduleFragment) == true) -> {
-            if (type.isImmutableCollection(moduleFragment)) emptyList()
-            else listOf(
-                KetolangValidationError(
-                    "Ketolang error: mutable collection properties are not allowed!",
-                    property
+            if (type.isImmutableCollection(moduleFragment)) {
+                emptyList()
+            } else {
+                listOf(
+                    KetolangValidationError(
+                        "Ketolang error: mutable collection properties are not allowed!",
+                        property
+                    )
                 )
-            )
+            }
         }
 
         type?.isArray() == true -> listOf(

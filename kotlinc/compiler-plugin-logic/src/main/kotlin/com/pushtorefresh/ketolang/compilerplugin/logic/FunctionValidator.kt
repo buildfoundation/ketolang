@@ -97,7 +97,7 @@ private fun validateTopLevelFunction(
         )
     }
 
-    errors += function.body?.statements?.map { validateStatement(it) }?.filterNotNull() ?: emptyList()
+    errors += function.body?.statements?.flatMap { validateStatement(it) } ?: emptyList()
 
     return errors
 }

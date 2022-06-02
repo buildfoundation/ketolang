@@ -64,6 +64,10 @@ complexity:
     active: false
   StringLiteralDuplication:
     active: false
+  NestedBlockDepth:
+    active: false
+  LongMethod:
+    active: false
 
 coroutines:
   InjectDispatcher:
