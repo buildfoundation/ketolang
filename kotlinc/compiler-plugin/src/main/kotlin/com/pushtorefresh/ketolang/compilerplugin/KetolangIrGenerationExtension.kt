@@ -27,7 +27,6 @@ import org.jetbrains.kotlin.ir.types.getPublicSignature
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.isAny
 import org.jetbrains.kotlin.ir.types.isArray
-import org.jetbrains.kotlin.ir.types.isCollection
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
@@ -101,11 +100,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         return when {
             parent is IrClass -> {
                 when {
-                    parent.isData -> validateDataClassProperty(
-                        property
-                    )
-
-                    parent.isEnumClass -> validateEnumProperty(property)
+                    parent.isData -> validateDataClassProperty(moduleFragment, property)
+                    parent.isEnumClass -> validateEnumProperty(moduleFragment, property)
                     else -> KetolangValidationError(
                         "Ketolang error: property looks suspicious! Perhaps Ketolang needs an update to validate it",
                         property
@@ -178,6 +174,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateDataClassProperty(
+        moduleFragment: IrModuleFragment,
         property: IrPropertyImpl,
     ): KetolangValidationError? {
         val type by lazy(LazyThreadSafetyMode.NONE) { property.backingField!!.type }
@@ -197,7 +194,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             return null
         }
 
-        if (type.isCollection()) {
+        if (type.isSomeCollection(moduleFragment)) {
             if (type.isImmutableCollection()) {
                 return null
             } else {
@@ -226,19 +223,20 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateEnumProperty(
+        moduleFragment: IrModuleFragment,
         property: IrPropertyImpl
     ): KetolangValidationError? {
         if (property.backingField == null && (property.name.asString() == "name" || property.name.asString() == "ordinal")) {
             return null
         } else {
-            return validateDataClassProperty(property)
+            return validateDataClassProperty(moduleFragment, property)
         }
     }
 
-    private fun validateFunction(@Suppress("UNUSED_PARAMETER") moduleFragment: IrModuleFragment, function: IrFunctionImpl): KetolangValidationError? {
+    private fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): KetolangValidationError? {
         return when {
             function.parent is IrClassImpl -> validateClassFunction(function)
-            function.isTopLevel -> validateTopLevelFunction(function)
+            function.isTopLevel -> validateTopLevelFunction(moduleFragment, function)
             else -> KetolangValidationError(
                 "Ketolang error: function looks suspicious! Perhaps Ketolang needs an update to validate it",
                 function
@@ -259,6 +257,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateTopLevelFunction(
+        moduleFragment: IrModuleFragment,
         function: IrFunctionImpl
     ): KetolangValidationError? {
         if (function.isSuspend) {
@@ -275,7 +274,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             return KetolangValidationError("Ketolang error: functions returning Any are not allowed!", function)
         }
 
-        if (returnType.isCollection()) {
+        if (returnType.isSomeCollection(moduleFragment)) {
             if (returnType.isImmutableCollection()) {
                 return null
             } else {

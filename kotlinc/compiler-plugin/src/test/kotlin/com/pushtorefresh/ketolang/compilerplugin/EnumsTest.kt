@@ -59,7 +59,7 @@ class EnumsTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             enum class E(val a: List<Int>) {
-                A(1),B(2),C(3)
+                A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
         """
         )
