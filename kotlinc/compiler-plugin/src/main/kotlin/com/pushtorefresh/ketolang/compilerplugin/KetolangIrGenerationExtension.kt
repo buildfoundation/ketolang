@@ -14,11 +14,13 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
+import org.jetbrains.kotlin.ir.declarations.impl.IrTypeAliasImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.getPublicSignature
@@ -32,6 +34,8 @@ import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.types.typeOrNull
 import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.isEnumClass
+import org.jetbrains.kotlin.ir.util.isEnumEntry
+import org.jetbrains.kotlin.ir.util.isInterface
 
 class KetolangIrGenerationExtension(private val messageCollector: MessageCollector) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
@@ -39,13 +43,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         val ketolangValidationErrors = moduleFragment
             .files
             .flatMap { file -> file.declarations.map { file to it } }
-            .flatMap { (file, declaration) ->
-                when (declaration) {
-                    is IrPropertyImpl -> listOf(file to validateProperty(declaration))
-                    is IrFunctionImpl -> listOf(file to validateFunction(declaration))
-                    else -> emptyList()
-                }
-            }
+            .flatMap { (file, declaration) -> validateDeclaration(file, declaration) }
             .filter { (_, error) -> error != null }
 
         if (ketolangValidationErrors.isNotEmpty()) {
@@ -61,6 +59,31 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
                 "Ketolang validation errors were found, aborting compilation!"
             )
         }
+    }
+
+    private fun validateDeclaration(
+        file: IrFile,
+        declaration: IrDeclaration
+    ): List<Pair<IrFile, KetolangValidationError?>> {
+        return when (declaration) {
+            is IrPropertyImpl -> listOf(validateProperty(declaration))
+            is IrFunctionImpl -> listOf(validateFunction(declaration))
+            is IrTypeAliasImpl -> listOf(validateTypeAlias(declaration))
+            is IrClassImpl -> {
+                validateClass(declaration).let {
+                    if (it == null) {
+                        declaration
+                            .declarations
+                            .flatMap { validateDeclaration(file, it).map { (_, error) -> error } }
+                            .toList()
+                    } else {
+                        listOf(it)
+                    }
+                }
+            }
+
+            else -> emptyList()
+        }.map { error -> file to error }
     }
 
     private fun validateProperty(
@@ -270,6 +293,27 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             "Ketolang error: function looks suspicious! Perhaps Ketolang needs an update to validate it.",
             function
         )*/
+    }
+
+    private fun validateTypeAlias(typeAlias: IrTypeAliasImpl): KetolangValidationError? {
+        return KetolangValidationError("Ketolang error: type-aliases are not allowed!", typeAlias)
+    }
+
+    private fun validateClass(clazz: IrClassImpl): KetolangValidationError? {
+        if (clazz.isInterface) {
+            return KetolangValidationError("Ketolang error: abstract classes and interfaces are not allowed!", clazz)
+        }
+
+        if (clazz.isData) {
+            return null
+        } else if (clazz.isEnumClass || clazz.isEnumEntry) {
+            return null
+        }
+
+        return KetolangValidationError(
+            "Ketolang error: regular classes are not allowed, only data classes and enums are allowed!",
+            clazz
+        )
     }
 
     private fun IrType.isImmutableCollection(): Boolean {
