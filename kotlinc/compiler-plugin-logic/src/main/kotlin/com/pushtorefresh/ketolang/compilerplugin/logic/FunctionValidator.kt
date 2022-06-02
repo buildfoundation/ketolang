@@ -17,34 +17,38 @@ import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.util.isReal
 import org.jetbrains.kotlin.ir.util.statements
 
-fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): KetolangValidationError? {
+fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): List<KetolangValidationError> {
     return when {
         function.parent is IrClassImpl -> validateClassFunction(function)
         function.isTopLevel -> validateTopLevelFunction(moduleFragment, function)
-        else -> KetolangValidationError(
-            "Ketolang error: function looks suspicious! Perhaps Ketolang needs an update to validate it",
-            function
+        else -> listOf(
+            KetolangValidationError(
+                "Ketolang error: function looks suspicious! Perhaps Ketolang needs an update to validate it",
+                function
+            )
         )
     }
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
-private fun validateClassFunction(function: IrFunctionImpl): KetolangValidationError? {
+private fun validateClassFunction(function: IrFunctionImpl): List<KetolangValidationError> {
     if (function.descriptor is IrConstructor) {
         // Do we need additional constructor validation?
-        return null
+        return emptyList()
     } else if (!function.isReal) {
         // Auto-generated functions such as "clone", "finalize" and such.
         // If User implements then, then they're "real".
-        return null
+        return emptyList()
     } else if (function.origin is IrDeclarationOrigin.ENUM_CLASS_SPECIAL_MEMBER) {
-        return null
+        return emptyList()
     } else if (function.origin is IrDeclarationOrigin.GENERATED_DATA_CLASS_MEMBER) {
-        return null
+        return emptyList()
     } else {
-        return KetolangValidationError(
-            "Ketolang error: functions in classes are not allowed!",
-            function
+        return listOf(
+            KetolangValidationError(
+                "Ketolang error: functions in classes are not allowed!",
+                function
+            )
         )
     }
 }
@@ -53,63 +57,47 @@ private fun validateClassFunction(function: IrFunctionImpl): KetolangValidationE
 private fun validateTopLevelFunction(
     moduleFragment: IrModuleFragment,
     function: IrFunctionImpl
-): KetolangValidationError? {
-    val statementValidationError = function.body?.statements?.map { validateStatement(it) }
-        ?.filterNotNull()?.firstOrNull()
-
-    if (statementValidationError != null) {
-        return statementValidationError
-    }
+): List<KetolangValidationError> {
+    val errors = mutableListOf<KetolangValidationError>()
 
     if (function.isSuspend) {
-        return KetolangValidationError("Ketolang error: suspend functions are not allowed!", function)
+        errors += KetolangValidationError("Ketolang error: suspend functions are not allowed!", function)
     }
 
     val returnType = function.returnType
 
     if (returnType.isUnit()) {
-        return KetolangValidationError("Ketolang error: functions returning Unit are not allowed!", function)
-    }
-
-    if (returnType.isAny()) {
-        return KetolangValidationError("Ketolang error: functions returning Any are not allowed!", function)
-    }
-
-    if (returnType.isSomeCollection(moduleFragment)) {
-        if (returnType.isImmutableCollection(moduleFragment)) {
-            return null
-        } else {
-            return KetolangValidationError(
-                "Ketolang error: functions returning mutable collections are not allowed!",
-                function
-            )
-        }
+        errors += KetolangValidationError("Ketolang error: functions returning Unit are not allowed!", function)
+    } else if (returnType.isAny()) {
+        errors += KetolangValidationError("Ketolang error: functions returning Any are not allowed!", function)
+    } else if (returnType.isSomeCollection(moduleFragment) && !returnType.isImmutableCollection(moduleFragment)) {
+        errors += KetolangValidationError(
+            "Ketolang error: functions returning mutable collections are not allowed!",
+            function
+        )
     }
 
     if (function.allParametersCount == 0) {
-        return KetolangValidationError(
+        errors += KetolangValidationError(
             "Ketolang error: functions without parameters are not allowed!",
             function
         )
     }
 
-    if (function.allParameters.map { it.type }
+    if (!function.allParameters.map { it.type }
             .all {
                 it.isPrimitiveType()
                         || it.isString()
                         || it.classOrNull?.descriptor?.isData == true
                         || it.isImmutableCollection(moduleFragment)
             }) {
-        return null
-    } else {
-        return KetolangValidationError(
+        errors += KetolangValidationError(
             "Ketolang error: functions accepting mutable parameters are not allowed!",
             function
         )
     }
 
-    /*return ketolangValidationError(
-        "Ketolang error: function looks suspicious! Perhaps Ketolang needs an update to validate it.",
-        function
-    )*/
+    errors += function.body?.statements?.map { validateStatement(it) }?.filterNotNull() ?: emptyList()
+
+    return errors
 }
