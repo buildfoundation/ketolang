@@ -36,8 +36,8 @@ class FunctionsInClassesTest {
             enum class E {
                 A,B,C;
                 
-            fun f(a: String): Int {
-                    return a.length
+                fun f(a: String): Int {
+                        return a.length
                 }
             }
         """

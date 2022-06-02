@@ -4,7 +4,6 @@ import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.allParametersCount
-import org.jetbrains.kotlin.backend.common.ir.classIfConstructor
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
 import org.jetbrains.kotlin.builtins.StandardNames
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
@@ -14,7 +13,9 @@ import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFile
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
@@ -36,6 +37,7 @@ import org.jetbrains.kotlin.ir.util.SYNTHETIC_OFFSET
 import org.jetbrains.kotlin.ir.util.isEnumClass
 import org.jetbrains.kotlin.ir.util.isEnumEntry
 import org.jetbrains.kotlin.ir.util.isInterface
+import org.jetbrains.kotlin.ir.util.isReal
 
 class KetolangIrGenerationExtension(private val messageCollector: MessageCollector) : IrGenerationExtension {
 
@@ -244,9 +246,16 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         }
     }
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun validateClassFunction(function: IrFunctionImpl): KetolangValidationError? {
-        if (function.classIfConstructor == function) {
+        if (function.descriptor is IrConstructor) {
             // TODO: validate constructors too.
+            return null
+        } else if (!function.isReal) {
+            // Auto-generated functions such as "clone", "finalize" and such.
+            // If User implements then, then they're "real".
+            return null
+        } else if (function.origin is IrDeclarationOrigin.ENUM_CLASS_SPECIAL_MEMBER) {
             return null
         } else {
             return KetolangValidationError(
@@ -331,7 +340,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
 
     private fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
         return isSubtypeOfClass(moduleFragment.irBuiltins.collectionClass)
-                || classifierOrFail.signature == SIGNATURE_MUTABLE_MAP
+                || isSubtypeOfClass(moduleFragment.irBuiltins.mapClass)
+                || isSubtypeOfClass(moduleFragment.irBuiltins.mutableMapClass)
     }
 
     private fun IrType.isImmutableCollection(): Boolean {

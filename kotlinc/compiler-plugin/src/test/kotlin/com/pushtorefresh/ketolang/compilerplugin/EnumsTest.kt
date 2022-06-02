@@ -73,7 +73,7 @@ class EnumsTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             enum class E(var a: List<Int>) {
-                A(1),B(2),C(3)
+                A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
         """
         )
@@ -91,7 +91,7 @@ class EnumsTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             enum class E(var a: List<Any>) {
-                A(1),B(2),C(3)
+                A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
         """
         )
@@ -109,7 +109,7 @@ class EnumsTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             enum class E(var a: MutableList<Int>) {
-                A(1),B(2),C(3)
+                A(mutableListOf(1)),B(mutableListOf(2)),C(mutableListOf(3))
             }
         """
         )
