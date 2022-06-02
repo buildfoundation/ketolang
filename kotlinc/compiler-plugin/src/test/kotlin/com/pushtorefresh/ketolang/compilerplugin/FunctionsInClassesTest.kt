@@ -53,7 +53,7 @@ class FunctionsInClassesTest {
     }
 
     @Test
-    fun `valid top-level function is not allowed in class`() {
+    fun `valid top-level function is not allowed in a class`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             class C {

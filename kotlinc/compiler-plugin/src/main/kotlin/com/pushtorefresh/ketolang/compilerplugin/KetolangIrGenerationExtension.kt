@@ -382,6 +382,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         return when (this) {
             is IrPropertyImpl -> name.asString()
             is IrFunctionImpl -> name.asString()
+            is IrClassImpl -> name.asString()
             else -> "no printable name"
         }
     }
