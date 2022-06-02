@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.cli.common.messages.CompilerMessageLocationWithRange
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSourceLocation
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.IrElement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
@@ -322,7 +323,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
     }
 
     private fun validateClass(clazz: IrClassImpl): KetolangValidationError? {
-        if (clazz.isInterface) {
+        if (clazz.isInterface || clazz.modality == Modality.ABSTRACT) {
             return KetolangValidationError("Ketolang error: abstract classes and interfaces are not allowed!", clazz)
         }
 
