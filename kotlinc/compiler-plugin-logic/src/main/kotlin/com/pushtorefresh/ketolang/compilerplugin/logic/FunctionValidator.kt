@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.util.isReal
+import org.jetbrains.kotlin.ir.util.statements
 
 fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): KetolangValidationError? {
     return when {
@@ -53,6 +54,13 @@ private fun validateTopLevelFunction(
     moduleFragment: IrModuleFragment,
     function: IrFunctionImpl
 ): KetolangValidationError? {
+    val statementValidationError = function.body?.statements?.map { validateStatement(it) }
+        ?.filterNotNull()?.firstOrNull()
+
+    if (statementValidationError != null) {
+        return statementValidationError
+    }
+
     if (function.isSuspend) {
         return KetolangValidationError("Ketolang error: suspend functions are not allowed!", function)
     }

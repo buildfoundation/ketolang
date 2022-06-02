@@ -213,4 +213,70 @@ class FunctionsTopLevelTest {
             "Ketolang error: suspend functions are not allowed!, node name = 'f'"
         )
     }
+
+    @Test
+    fun `call to prohibited Kotlin package is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            import java.io.File
+
+            fun f(s: String): Int {
+                File("file").appendText("abc")
+                return s.length
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: call to prohibited package kotlin.io!, node name = 'no printable name'"
+        )
+    }
+
+    @Test
+    fun `call to prohibited Java package is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            import java.io.File
+
+            fun f(s: String): Int {
+                File("file").createNewFile()
+                return s.length
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: call to prohibited package java.io!, node name = 'no printable name'"
+        )
+    }
+
+    @Test
+    fun `constructor call to prohibited Java package is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            import java.io.File
+
+            fun f(s: String): Int {
+                File("file")
+                return s.length
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: call to prohibited package java.io!, node name = 'no printable name'"
+        )
+    }
 }
