@@ -148,6 +148,10 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             )
         }
 
+        if (type.classOrNull?.descriptor?.isData == true) {
+            return null
+        }
+
         // TODO fix isCollection to actually check if is assignable from
         if (type.isSomeCollection(moduleFragment)) {
             if (type.isImmutableCollection()) {
@@ -177,6 +181,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         )
     }
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun validateDataClassProperty(
         moduleFragment: IrModuleFragment,
         property: IrPropertyImpl,
@@ -194,7 +199,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             )
         }
 
-        if (type.isPrimitiveType() || type.isString()) {
+        if (type.isPrimitiveType() || type.isString() || type.classOrNull?.descriptor?.isData == true) {
             return null
         }
 
@@ -269,6 +274,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         }
     }
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
     private fun validateTopLevelFunction(
         moduleFragment: IrModuleFragment,
         function: IrFunctionImpl
@@ -306,7 +312,7 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
         }
 
         if (function.allParameters.map { it.type }
-                .all { it.isPrimitiveType() || it.isString() || it.isImmutableCollection() }) {
+                .all { it.isPrimitiveType() || it.isString() || it.classOrNull?.descriptor?.isData == true || it.isImmutableCollection() }) {
             return null
         } else {
             return KetolangValidationError(

@@ -6,83 +6,65 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class DataClassTest {
+class DataClassTopLevelPropertiesTest {
 
     @Test
-    fun `data class(val Int) is allowed`() {
+    fun `val data class is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
+            val d = D(1) 
         """
         )
 
         val result = compile(aKt)
+
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
     @Test
-    fun `data class(data class) is allowed`() {
+    fun `var data class is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            data class D1(val i: Int)
-            data class D2(val d: D1)
+            data class D(val i: Int)
+            var d = D(1) 
         """
         )
 
         val result = compile(aKt)
-        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-    }
 
-    @Test
-    fun `data class(var Int) is not allowed`() {
-        val aKt = SourceFile.kotlin(
-            "a.kt", """
-            data class D(var i: Int)
-        """
-        )
-
-        val result = compile(aKt)
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Ketolang error: mutable properties are not allowed!, node name = 'i'"
+            "Ketolang error: mutable properties are not allowed!, node name = 'd'"
         )
     }
 
     @Test
-    fun `data class (val List(Int)) is allowed`() {
+    fun `val List(data class) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            data class D(val l: List<Int>)
+            data class D(val i: Int)
+            val l: List<D> = listOf(D(1)) 
         """
         )
 
         val result = compile(aKt)
+
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
     @Test
-    fun `data class (val List(data class)) is allowed`() {
+    fun `var List(data class) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            data class D1(val i: Int)
-            data class D2(val l: List<D1>)
+            data class D(val i: Int)
+            var l: List<D> = listOf(D(1)) 
         """
         )
 
         val result = compile(aKt)
-        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-    }
 
-    @Test
-    fun `data class (var List(Int)) is not allowed`() {
-        val aKt = SourceFile.kotlin(
-            "a.kt", """
-            data class D(var l: List<Int>)
-        """
-        )
-
-        val result = compile(aKt)
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
@@ -91,30 +73,16 @@ class DataClassTest {
     }
 
     @Test
-    fun `data class (var List(Any)) is not allowed`() {
+    fun `val MutableList(data class) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-                data class D(var l: List<Any>)
+            data class D(val i: Int)
+            val l: MutableList<D> = mutableListOf(D(1)) 
         """
         )
 
         val result = compile(aKt)
-        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
-        assertContains(
-            result.messages,
-            "Ketolang error: mutable properties are not allowed!, node name = 'l'"
-        )
-    }
 
-    @Test
-    fun `data class (val MutableList(Int)) is not allowed`() {
-        val aKt = SourceFile.kotlin(
-            "a.kt", """
-            data class D(val l: MutableList<Int>)
-        """
-        )
-
-        val result = compile(aKt)
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,

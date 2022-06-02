@@ -99,6 +99,21 @@ class FunctionsTopLevelTest {
     }
 
     @Test
+    fun `data class parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            data class D(val i: Int)
+            fun f(d: D): String {
+                return d.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `String parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
