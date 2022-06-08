@@ -11,12 +11,13 @@ List of restricted Kotlin functionality (each option will have feature flag to e
 - `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
 - Reading environment variables is not allowed
 - Reflection is not allowed
-- [x] Static mutable state (companion object, top level static variables) is not allowed
+- [x] Global mutable state is not allowed
 - [x] Mutable collections as function args, return type or properties are not allowed
 - [x] Delegated properties are not allowed
 - [x] Type aliases are not allowed
 - [x] Type casting to mutable types is not allowed (ie casting List to MutableList to get to mutable state)
-- [x] Regular classes and interfaces are not allowed, however data classes are allowed
+- [x] Regular classes and interfaces are not allowed, however data classes, enums and objects are allowed
+- Code must be placed in named packages
 
 ## FAQ
 

@@ -6,13 +6,15 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class ArrayTopLevelPropertiesTest {
+class ArrayAsObjectPropertiesTest {
 
     @Test
     fun `var Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b = arrayOf<Int>()
+            object A {
+                var b = arrayOf<Int>()
+            }
         """
         )
 
@@ -29,7 +31,9 @@ class ArrayTopLevelPropertiesTest {
     fun `val Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b = arrayOf<Int>()
+            object A {
+                val b = arrayOf<Int>()
+            }
         """
         )
 

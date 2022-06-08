@@ -6,14 +6,15 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class PrimitiveTopLevelPropertiesTest {
+class PrimitiveObjectPropertiesTest {
 
     @Test
     fun `var Int is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Int = 1 
-        """
+            object A {
+                var b: Int = 1
+            }"""
         )
 
         val result = compile(aKt)
@@ -29,8 +30,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Int is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Int = 1 
-        """
+            object A {
+                val b: Int = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -46,8 +48,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Int is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Int = 1 
-        """
+            object A {
+                const val b: Int = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -58,8 +61,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var Long is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Long = 1 
-        """
+            object A {
+                var b: Long = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -75,8 +79,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Long is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Long = 1 
-        """
+            object A {
+                val b: Long = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -92,8 +97,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Long is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Long = 1 
-        """
+            object A {
+                const val b: Long = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -104,8 +110,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var Short is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Short = 1 
-        """
+            object A {
+                var b: Short = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -121,8 +128,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Short is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Short = 1 
-        """
+            object A {
+                val b: Short = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -138,8 +146,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Short is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Short = 1 
-        """
+            object A {
+                const val b: Short = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -150,8 +159,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var Byte is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Byte = 1 
-        """
+            object A {
+                var b: Byte = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -167,8 +177,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Byte is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Byte = 1 
-        """
+            object A {
+                val b: Byte = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -184,8 +195,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Byte is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Byte = 1 
-        """
+            object A {
+                const val b: Byte = 1 
+            }"""
         )
 
         val result = compile(aKt)
@@ -196,8 +208,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var Double is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Double = 1.0 
-        """
+            object A {
+                var b: Double = 1.0 
+            }"""
         )
 
         val result = compile(aKt)
@@ -213,8 +226,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Double is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Double = 1.0 
-        """
+            object A {
+                val b: Double = 1.0 
+            }"""
         )
 
         val result = compile(aKt)
@@ -230,8 +244,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Double is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Double = 1.0 
-        """
+            object A {
+                const val b: Double = 1.0 
+            }"""
         )
 
         val result = compile(aKt)
@@ -242,8 +257,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var Float is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Float = 1.0f
-        """
+            object A {
+                var b: Float = 1.0f
+            }"""
         )
 
         val result = compile(aKt)
@@ -259,8 +275,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val Float is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Float = 1.0f
-        """
+            object A {
+                val b: Float = 1.0f
+            }"""
         )
 
         val result = compile(aKt)
@@ -276,8 +293,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val Float is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: Float = 1.0f 
-        """
+            object A {
+                const val b: Float = 1.0f 
+            }"""
         )
 
         val result = compile(aKt)
@@ -288,8 +306,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `var String is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: String = "abc" 
-        """
+            object A {
+                var b: String = "abc" 
+            }"""
         )
 
         val result = compile(aKt)
@@ -305,8 +324,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `val String is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: String = "abc" 
-        """
+            object A {
+                val b: String = "abc" 
+            }"""
         )
 
         val result = compile(aKt)
@@ -322,8 +342,9 @@ class PrimitiveTopLevelPropertiesTest {
     fun `const val String is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            const val b: String = "abc" 
-        """
+            object A {
+                const val b: String = "abc" 
+            }"""
         )
 
         val result = compile(aKt)
