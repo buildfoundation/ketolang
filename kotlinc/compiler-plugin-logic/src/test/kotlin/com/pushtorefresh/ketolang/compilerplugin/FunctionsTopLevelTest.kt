@@ -88,7 +88,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "Ketolang error: functions accepting potentially mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -192,7 +192,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "Ketolang error: functions accepting potentially mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
@@ -213,7 +213,7 @@ class FunctionsTopLevelTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'f'"
+            "Ketolang error: functions accepting potentially mutable parameters are not allowed!, node name = 'f'"
         )
     }
 
