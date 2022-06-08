@@ -12,6 +12,8 @@ class ArrayAsObjectPropertiesTest {
     fun `var Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b = arrayOf<Int>()
             }
@@ -31,6 +33,8 @@ class ArrayAsObjectPropertiesTest {
     fun `val Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b = arrayOf<Int>()
             }

@@ -12,6 +12,8 @@ class CastTest {
     fun `explicit casting in function is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(l: List<Int>): Int {
                 val m = l as MutableList<Int>
                 m.add(1)
@@ -33,6 +35,8 @@ class CastTest {
     fun `explicit safe casting in function is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(l: List<Int>): Int {
                 val m = l as? MutableList<Int>
                 m?.add(1)
@@ -54,6 +58,8 @@ class CastTest {
     fun `explicit casting in conditional property initializer is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val l1: List<Int> = mutableListOf()
                 val l2: List<Int> = (if ((l1 as MutableList<Int>).add(2)) l1 else emptyList())
@@ -74,6 +80,8 @@ class CastTest {
     fun `explicit casting in property initializer is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val l1: List<Int> = mutableListOf()
                 val l2: List<Int> = l1 as MutableList<Int>
@@ -94,6 +102,8 @@ class CastTest {
     fun `explicit casting in function via generics is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun <T> List<*>.okay() = this as T
             val l1 : List<String> = mutableListOf()
             fun f(i: Int): Int {
@@ -116,6 +126,8 @@ class CastTest {
     fun `casting in function via reflection is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             inline fun <reified T: Any, V: Any> List<V>.okay() = T::class.cast(this)
         """
         )
@@ -133,6 +145,8 @@ class CastTest {
     fun `casting via inline function is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             inline fun <reified T: Any, V: Any> List<V>.okay() = this as T
             fun lol(i: Int): Int {
                 val l1 : List<String> = mutableListOf()
@@ -155,6 +169,8 @@ class CastTest {
     fun `implicit casting via when statement is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(i: Int): Int  {
                 val x = if (i > 10) i.toString() else i
 
@@ -174,6 +190,8 @@ class CastTest {
     fun `implicit casting to mutable type via when statement is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(l: List<Int>): List<Int>  {
                 return when (l) {
                     is MutableList -> { l.add(2); l }

@@ -12,6 +12,8 @@ class RegularClassesTest {
     fun `class is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             class C {
                 
             }

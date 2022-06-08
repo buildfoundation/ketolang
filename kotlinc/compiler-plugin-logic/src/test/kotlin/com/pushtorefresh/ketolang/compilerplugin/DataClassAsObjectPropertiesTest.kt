@@ -12,6 +12,8 @@ class DataClassAsObjectPropertiesTest {
     fun `val data class is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 val d = D(1)
@@ -27,6 +29,8 @@ class DataClassAsObjectPropertiesTest {
     fun `var data class is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 var d = D(1)
@@ -47,6 +51,8 @@ class DataClassAsObjectPropertiesTest {
     fun `val List(data class) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 val l: List<D> = listOf(D(1))
@@ -63,6 +69,8 @@ class DataClassAsObjectPropertiesTest {
     fun `var List(data class) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 var l: List<D> = listOf(D(1))
@@ -83,6 +91,8 @@ class DataClassAsObjectPropertiesTest {
     fun `val MutableList(data class) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 val l: MutableList<D> = mutableListOf(D(1))

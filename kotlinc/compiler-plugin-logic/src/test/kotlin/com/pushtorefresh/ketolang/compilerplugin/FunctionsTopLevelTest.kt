@@ -12,6 +12,8 @@ class FunctionsTopLevelTest {
     fun `return type Unit is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f() {
                 
             }
@@ -31,6 +33,8 @@ class FunctionsTopLevelTest {
     fun `return type Any is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(): Any {
                 return Unit
             }
@@ -50,6 +54,8 @@ class FunctionsTopLevelTest {
     fun `0 parameters are not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(): Int {
                 return 0
             }
@@ -69,6 +75,8 @@ class FunctionsTopLevelTest {
     fun `Array parameter is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(array: Array<String>): Int {
                 return array.size
             }
@@ -88,6 +96,8 @@ class FunctionsTopLevelTest {
     fun `Int parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(b: Int): String {
                 return b.toString()
             }
@@ -102,6 +112,8 @@ class FunctionsTopLevelTest {
     fun `data class parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             fun f(d: D): String {
                 return d.toString()
@@ -117,6 +129,8 @@ class FunctionsTopLevelTest {
     fun `String parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(b: String): String {
                 return b
             }
@@ -131,6 +145,8 @@ class FunctionsTopLevelTest {
     fun `List(String) parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(b: List<String>): String {
                 return b.toString()
             }
@@ -145,6 +161,8 @@ class FunctionsTopLevelTest {
     fun `List(data class) parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
 
             fun f(b: List<D>): String {
@@ -161,6 +179,8 @@ class FunctionsTopLevelTest {
     fun `List(Any) parameter is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(b: List<Any>): String {
                 return b.toString()
             }
@@ -180,6 +200,8 @@ class FunctionsTopLevelTest {
     fun `MutableList(String) parameter is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             fun f(b: MutableList<Any>): String {
                 return b.toString()
             }
@@ -199,6 +221,8 @@ class FunctionsTopLevelTest {
     fun `suspend function is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             suspend fun f(b: Int): String {
                 return b.toString()
             }
@@ -218,6 +242,8 @@ class FunctionsTopLevelTest {
     fun `call to prohibited Kotlin package is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             import java.io.File
 
             fun f(s: String): Int {
@@ -240,6 +266,8 @@ class FunctionsTopLevelTest {
     fun `call to prohibited Java package is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             import java.io.File
 
             fun f(s: String): Int {
@@ -262,6 +290,8 @@ class FunctionsTopLevelTest {
     fun `constructor call to prohibited Java package is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             import java.io.File
 
             fun f(s: String): Int {

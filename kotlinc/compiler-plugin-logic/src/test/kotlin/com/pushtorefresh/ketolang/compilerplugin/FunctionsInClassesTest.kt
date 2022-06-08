@@ -12,6 +12,8 @@ class FunctionsInClassesTest {
     fun `valid top-level function is not allowed in data class`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val v: Int) {
                 fun f(a: String): Int {
                     return a.length
@@ -33,6 +35,8 @@ class FunctionsInClassesTest {
     fun `valid top-level function is not allowed in enum`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E {
                 A,B,C;
                 
@@ -56,6 +60,8 @@ class FunctionsInClassesTest {
     fun `valid top-level function is not allowed in a class`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             class C {
                 fun f(a: String): Int {
                     return a.length
@@ -77,6 +83,8 @@ class FunctionsInClassesTest {
     fun `valid top-level function is not allowed in interface`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             interface I {
                 fun f(a: String): Int {
                     return a.length
@@ -98,6 +106,8 @@ class FunctionsInClassesTest {
     fun `valid top-level function is not allowed in abstract class`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             abstract class C {
                 fun f(a: String): Int {
                     return a.length

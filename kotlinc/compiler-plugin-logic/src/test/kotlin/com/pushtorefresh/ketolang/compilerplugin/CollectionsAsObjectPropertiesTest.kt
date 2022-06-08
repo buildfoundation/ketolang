@@ -12,6 +12,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `var List(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: List<Int> = listOf()
             }
@@ -31,6 +33,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val List(Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: List<Int> = listOf()
             }
@@ -45,6 +49,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val List(String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: List<String> = listOf()
             }
@@ -59,6 +65,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val List(data class) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
             object A {
                 val b: List<D> = listOf()
@@ -74,6 +82,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val List(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: List<Any> = listOf()
             }
@@ -93,6 +103,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val MutableList(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: MutableList<Int> = mutableListOf()
             }
@@ -112,6 +124,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `var Set(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Set<Int> = setOf()
             }
@@ -131,6 +145,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Set(Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Set<Int> = setOf()
             }
@@ -145,6 +161,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Set(String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Set<String> = setOf()
             }
@@ -159,6 +177,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Set(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Set<Any> = setOf()
             }
@@ -178,6 +198,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val MutableSet(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: MutableSet<Int> = mutableSetOf()
             }
@@ -197,6 +219,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `var Map(Int, Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Map<Int, Int> = mapOf()
             }
@@ -216,6 +240,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Map(Int, Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Map<Int, Int> = mapOf()
             }
@@ -230,6 +256,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Map(String, String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Map<String, String> = mapOf()
             }
@@ -244,6 +272,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val Map(Any, Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Map<Any, Any> = mapOf()
             }
@@ -263,6 +293,8 @@ class CollectionsAsObjectPropertiesTest {
     fun `val MutableMap(Int, Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: MutableMap<Int, Int> = mutableMapOf()
             }

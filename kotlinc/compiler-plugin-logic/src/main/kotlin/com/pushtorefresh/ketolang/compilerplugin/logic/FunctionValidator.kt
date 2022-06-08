@@ -15,10 +15,17 @@ import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isUnit
 import org.jetbrains.kotlin.ir.util.isReal
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.statements
 
 fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): List<KetolangValidationError> {
-    return when {
+    val errors = mutableListOf<KetolangValidationError>()
+
+    if (function.parent.kotlinFqName.isRoot) {
+        errors += KetolangValidationError("Ketolang error: function must be declared in a named package!", function)
+    }
+
+    errors += when {
         function.parent is IrClassImpl -> validateClassFunction(function)
         function.isTopLevel -> validateTopLevelFunction(moduleFragment, function)
         else -> listOf(
@@ -28,6 +35,8 @@ fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl)
             )
         )
     }
+
+    return errors
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)

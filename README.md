@@ -17,7 +17,7 @@ List of restricted Kotlin functionality (each option will have feature flag to e
 - [x] Type aliases are not allowed
 - [x] Type casting to mutable types is not allowed (ie casting List to MutableList to get to mutable state)
 - [x] Regular classes and interfaces are not allowed, however data classes, enums and objects are allowed
-- Code must be placed in named packages
+- [x] Code must be placed in named packages
 
 ## FAQ
 

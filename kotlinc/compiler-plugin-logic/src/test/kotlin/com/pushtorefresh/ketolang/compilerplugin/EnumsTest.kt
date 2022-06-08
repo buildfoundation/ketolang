@@ -12,6 +12,8 @@ class EnumsTest {
     fun `enum is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E {
                 A,B,C
             }
@@ -26,6 +28,8 @@ class EnumsTest {
     fun `enum with var Int is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(var a: Int) {
                 A(1),B(2),C(3)
             }
@@ -44,6 +48,8 @@ class EnumsTest {
     fun `enum with val Int is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(val a: Int) {
                 A(1),B(2),C(3)
             }
@@ -58,6 +64,8 @@ class EnumsTest {
     fun `enum with val List(Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(val a: List<Int>) {
                 A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
@@ -72,6 +80,8 @@ class EnumsTest {
     fun `enum with val List(data class) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
 
             enum class E(val a: List<Int>) {
@@ -88,6 +98,8 @@ class EnumsTest {
     fun `enum with var List(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(var a: List<Int>) {
                 A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
@@ -106,6 +118,8 @@ class EnumsTest {
     fun `enum with var List(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(var a: List<Any>) {
                 A(listOf(1)),B(listOf(2)),C(listOf(3))
             }
@@ -124,6 +138,8 @@ class EnumsTest {
     fun `enum with var MutableList(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             enum class E(var a: MutableList<Int>) {
                 A(mutableListOf(1)),B(mutableListOf(2)),C(mutableListOf(3))
             }

@@ -12,6 +12,8 @@ class TopLevelPropertiesTest {
     fun `var is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             var b: Int = 1
             """
         )
@@ -29,6 +31,8 @@ class TopLevelPropertiesTest {
     fun `val is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             val b: Int = 1
             """
         )
@@ -46,6 +50,8 @@ class TopLevelPropertiesTest {
     fun `const val is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             const val b: Int = 1
             """
         )

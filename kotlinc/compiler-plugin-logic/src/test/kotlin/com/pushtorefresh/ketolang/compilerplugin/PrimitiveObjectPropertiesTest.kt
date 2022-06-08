@@ -12,6 +12,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Int is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Int = 1
             }"""
@@ -30,6 +32,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Int is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Int = 1 
             }"""
@@ -48,6 +52,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Int is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Int = 1 
             }"""
@@ -61,6 +67,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Long is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Long = 1 
             }"""
@@ -79,6 +87,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Long is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Long = 1 
             }"""
@@ -97,6 +107,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Long is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Long = 1 
             }"""
@@ -110,6 +122,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Short is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Short = 1 
             }"""
@@ -128,6 +142,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Short is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Short = 1 
             }"""
@@ -146,6 +162,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Short is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Short = 1 
             }"""
@@ -159,6 +177,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Byte is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Byte = 1 
             }"""
@@ -177,6 +197,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Byte is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Byte = 1 
             }"""
@@ -195,6 +217,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Byte is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Byte = 1 
             }"""
@@ -208,6 +232,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Double is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Double = 1.0 
             }"""
@@ -226,6 +252,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Double is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Double = 1.0 
             }"""
@@ -244,6 +272,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Double is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Double = 1.0 
             }"""
@@ -257,6 +287,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var Float is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: Float = 1.0f
             }"""
@@ -275,6 +307,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val Float is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: Float = 1.0f
             }"""
@@ -293,6 +327,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val Float is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: Float = 1.0f 
             }"""
@@ -306,6 +342,8 @@ class PrimitiveObjectPropertiesTest {
     fun `var String is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 var b: String = "abc" 
             }"""
@@ -324,6 +362,8 @@ class PrimitiveObjectPropertiesTest {
     fun `val String is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 val b: String = "abc" 
             }"""
@@ -342,6 +382,8 @@ class PrimitiveObjectPropertiesTest {
     fun `const val String is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object A {
                 const val b: String = "abc" 
             }"""

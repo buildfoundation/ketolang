@@ -11,6 +11,8 @@ class ObjectClassesTest {
     fun `object class is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             object MyStuff {
                 const val s = "abc"
             }
