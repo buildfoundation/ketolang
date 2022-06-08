@@ -4,9 +4,9 @@ Ketolang is a dialect of Kotlin without side-effects, it allows only data-classe
 
 Ketolang aims to cover use-cases of Starlark language but in compile-time, type-safe environment of Kotlin, with benefit of running in more performant environment than an interpreter (JVM, Native).
 
-List of restricted Kotlin functionality (each option has feature flag to enable/disable it):
+List of restricted Kotlin functionality (each option will have feature flag to enable/disable it):
 
-- File IO is not allowed (both reading and writing can be restricted)
+- File IO is not allowed (both reading and writing)
 - Network IO is not allowed (both reading and writing can be restricted)
 - `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
 - Reading environment variables is not allowed
@@ -15,8 +15,8 @@ List of restricted Kotlin functionality (each option has feature flag to enable/
 - [x] Mutable collections as function args, return type or properties are not allowed
 - [x] Delegated properties are not allowed
 - [x] Type aliases are not allowed
-- Type casting is not allowed (ie casting List to MutableList to get to mutable state)
-- Regular classes and interfaces are not allowed, however data classes are allowed
+- [x] Type casting to mutable types is not allowed (ie casting List to MutableList to get to mutable state)
+- [x] Regular classes and interfaces are not allowed, however data classes are allowed
 
 ## FAQ
 
