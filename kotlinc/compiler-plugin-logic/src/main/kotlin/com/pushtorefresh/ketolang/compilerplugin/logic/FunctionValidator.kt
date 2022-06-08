@@ -112,7 +112,7 @@ private fun validateTopLevelFunction(
         errors += KetolangValidationError(
             // "Ketolang error: functions accepting \"mutable\" parameters are not allowed!
             // Allowed parameters: primitives, String, data classes, enums and collections of these.",
-            "Ketolang error: functions accepting mutable parameters are not allowed!",
+            "Ketolang error: functions accepting potentially mutable parameters are not allowed!",
             function
         )
     }
