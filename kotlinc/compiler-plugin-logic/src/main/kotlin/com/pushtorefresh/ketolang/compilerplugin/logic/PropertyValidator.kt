@@ -21,7 +21,7 @@ fun validateProperty(
     return when {
         parent is IrClass -> {
             when {
-                parent.isObject -> validateTopLevelProperty(moduleFragment, property)
+                parent.isObject -> validateObjectProperty(moduleFragment, property)
                 parent.isData -> validateDataClassProperty(moduleFragment, property)
                 parent.isEnumClass -> validateEnumProperty(moduleFragment, property)
                 else -> listOf(
@@ -32,8 +32,7 @@ fun validateProperty(
                 )
             }
         }
-
-        property.isTopLevel -> validateTopLevelProperty(moduleFragment, property)
+        property.isTopLevel -> validateTopLevelProperty(property)
         else -> listOf(
             KetolangValidationError(
                 "Ketolang error: property looks suspicious! Perhaps Ketolang needs an update to validate it",
@@ -45,6 +44,16 @@ fun validateProperty(
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateTopLevelProperty(
+    property: IrPropertyImpl,
+): List<KetolangValidationError> {
+    return listOf(KetolangValidationError(
+        "Ketolang error: top-level properties are not allowed! Use object class to declare them",
+        property
+    ))
+}
+
+@OptIn(ObsoleteDescriptorBasedAPI::class)
+private fun validateObjectProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl,
 ): List<KetolangValidationError> {

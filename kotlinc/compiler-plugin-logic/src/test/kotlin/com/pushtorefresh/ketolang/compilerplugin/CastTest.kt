@@ -54,8 +54,10 @@ class CastTest {
     fun `explicit casting in conditional property initializer is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val l1: List<Int> = mutableListOf()
-            val l2: List<Int> = (if ((l1 as MutableList<Int>).add(2)) l1 else emptyList())
+            object A {
+                val l1: List<Int> = mutableListOf()
+                val l2: List<Int> = (if ((l1 as MutableList<Int>).add(2)) l1 else emptyList())
+            }
         """
         )
 
@@ -72,8 +74,10 @@ class CastTest {
     fun `explicit casting in property initializer is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val l1: List<Int> = mutableListOf()
-            val l2: List<Int> = l1 as MutableList<Int>
+            object A {
+                val l1: List<Int> = mutableListOf()
+                val l2: List<Int> = l1 as MutableList<Int>
+            }
         """
         )
 

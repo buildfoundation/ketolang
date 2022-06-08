@@ -6,13 +6,15 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class CollectionTopLevelPropertiesTest {
+class CollectionsAsObjectPropertiesTest {
 
     @Test
     fun `var List(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: List<Int> = listOf()
+            object A {
+                var b: List<Int> = listOf()
+            }
         """
         )
 
@@ -29,7 +31,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val List(Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: List<Int> = listOf()
+            object A {
+                val b: List<Int> = listOf()
+            }
         """
         )
 
@@ -41,7 +45,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val List(String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: List<String> = listOf()
+            object A {
+                val b: List<String> = listOf()
+            }
         """
         )
 
@@ -54,8 +60,9 @@ class CollectionTopLevelPropertiesTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-
-            val b: List<D> = listOf()
+            object A {
+                val b: List<D> = listOf()
+            }
         """
         )
 
@@ -67,7 +74,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val List(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: List<Any> = listOf()
+            object A {
+                val b: List<Any> = listOf()
+            }
         """
         )
 
@@ -84,7 +93,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val MutableList(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: MutableList<Int> = mutableListOf()
+            object A {
+                val b: MutableList<Int> = mutableListOf()
+            }
         """
         )
 
@@ -101,7 +112,9 @@ class CollectionTopLevelPropertiesTest {
     fun `var Set(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Set<Int> = setOf()
+            object A {
+                var b: Set<Int> = setOf()
+            }
         """
         )
 
@@ -118,7 +131,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Set(Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Set<Int> = setOf()
+            object A {
+                val b: Set<Int> = setOf()
+            }
         """
         )
 
@@ -130,7 +145,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Set(String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Set<String> = setOf()
+            object A {
+                val b: Set<String> = setOf()
+            }
         """
         )
 
@@ -142,7 +159,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Set(Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Set<Any> = setOf()
+            object A {
+                val b: Set<Any> = setOf()
+            }
         """
         )
 
@@ -159,7 +178,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val MutableSet(Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: MutableSet<Int> = mutableSetOf()
+            object A {
+                val b: MutableSet<Int> = mutableSetOf()
+            }
         """
         )
 
@@ -176,7 +197,9 @@ class CollectionTopLevelPropertiesTest {
     fun `var Map(Int, Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            var b: Map<Int, Int> = mapOf()
+            object A {
+                var b: Map<Int, Int> = mapOf()
+            }
         """
         )
 
@@ -193,7 +216,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Map(Int, Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Map<Int, Int> = mapOf()
+            object A {
+                val b: Map<Int, Int> = mapOf()
+            }
         """
         )
 
@@ -205,7 +230,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Map(String, String) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Map<String, String> = mapOf()
+            object A {
+                val b: Map<String, String> = mapOf()
+            }
         """
         )
 
@@ -217,7 +244,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val Map(Any, Any) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: Map<Any, Any> = mapOf()
+            object A {
+                val b: Map<Any, Any> = mapOf()
+            }
         """
         )
 
@@ -234,7 +263,9 @@ class CollectionTopLevelPropertiesTest {
     fun `val MutableMap(Int, Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            val b: MutableMap<Int, Int> = mutableMapOf()
+            object A {
+                val b: MutableMap<Int, Int> = mutableMapOf()
+            }
         """
         )
 

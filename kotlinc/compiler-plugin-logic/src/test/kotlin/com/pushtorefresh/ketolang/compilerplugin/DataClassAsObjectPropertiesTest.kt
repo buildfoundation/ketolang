@@ -6,19 +6,20 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 
-class DataClassTopLevelPropertiesTest {
+class DataClassAsObjectPropertiesTest {
 
     @Test
     fun `val data class is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-            val d = D(1) 
+            object A {
+                val d = D(1)
+            }
         """
         )
 
         val result = compile(aKt)
-
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
@@ -27,7 +28,9 @@ class DataClassTopLevelPropertiesTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-            var d = D(1) 
+            object A {
+                var d = D(1)
+            }
         """
         )
 
@@ -45,7 +48,9 @@ class DataClassTopLevelPropertiesTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-            val l: List<D> = listOf(D(1)) 
+            object A {
+                val l: List<D> = listOf(D(1))
+            }
         """
         )
 
@@ -59,7 +64,9 @@ class DataClassTopLevelPropertiesTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-            var l: List<D> = listOf(D(1)) 
+            object A {
+                var l: List<D> = listOf(D(1))
+            }
         """
         )
 
@@ -77,7 +84,9 @@ class DataClassTopLevelPropertiesTest {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             data class D(val i: Int)
-            val l: MutableList<D> = mutableListOf(D(1)) 
+            object A {
+                val l: MutableList<D> = mutableListOf(D(1))
+            }
         """
         )
 
