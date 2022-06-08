@@ -70,7 +70,7 @@ private fun validateTopLevelFunction(
         errors += KetolangValidationError("Ketolang error: functions returning Unit are not allowed!", function)
     } else if (returnType.isAny()) {
         errors += KetolangValidationError("Ketolang error: functions returning Any are not allowed!", function)
-    } else if (returnType.isSomeCollection(moduleFragment) && !returnType.isImmutableCollection(moduleFragment)) {
+    } else if (returnType.isSomeCollection(moduleFragment) && !returnType.isImmutableCollection()) {
         errors += KetolangValidationError(
             "Ketolang error: functions returning mutable collections are not allowed!",
             function
@@ -89,7 +89,7 @@ private fun validateTopLevelFunction(
                 it.isPrimitiveType()
                         || it.isString()
                         || it.classOrNull?.descriptor?.isData == true
-                        || it.isImmutableCollection(moduleFragment)
+                        || it.isImmutableCollection()
             }) {
         errors += KetolangValidationError(
             // "Ketolang error: functions accepting \"mutable\" parameters are not allowed!
@@ -99,7 +99,7 @@ private fun validateTopLevelFunction(
         )
     }
 
-    errors += function.body?.statements?.flatMap { validateStatement(it) } ?: emptyList()
+    errors += function.body?.statements?.flatMap { validateStatement(it, moduleFragment) } ?: emptyList()
 
     return errors
 }

@@ -193,6 +193,98 @@ class PrimitiveTopLevelPropertiesTest {
     }
 
     @Test
+    fun `var Double is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            var b: Double = 1.0 
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+        )
+    }
+
+    @Test
+    fun `val Double is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            val b: Double = 1.0 
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+        )
+    }
+
+    @Test
+    fun `const val Double is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            const val b: Double = 1.0 
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `var Float is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            var b: Float = 1.0f
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+        )
+    }
+
+    @Test
+    fun `val Float is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            val b: Float = 1.0f
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: primitive and String properties must be declared as 'const', node name = 'b'"
+        )
+    }
+
+    @Test
+    fun `const val Float is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            const val b: Float = 1.0f 
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `var String is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
@@ -238,3 +330,4 @@ class PrimitiveTopLevelPropertiesTest {
         assertEquals(ExitCode.OK, result.exitCode)
     }
 }
+

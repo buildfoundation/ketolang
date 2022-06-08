@@ -44,6 +44,8 @@ style:
     active: false
   ReturnCount:
     active: false
+  CollapsibleIfStatements:
+    active: false
 
 naming:
   TopLevelPropertyNaming:

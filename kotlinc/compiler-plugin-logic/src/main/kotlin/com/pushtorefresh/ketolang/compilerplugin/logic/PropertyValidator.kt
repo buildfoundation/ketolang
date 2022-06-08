@@ -75,7 +75,7 @@ private fun validateTopLevelProperty(
     errors += when {
         (type?.classOrNull?.descriptor?.isData == true) -> emptyList()
         (type?.isSomeCollection(moduleFragment) == true) -> {
-            if (type.isImmutableCollection(moduleFragment)) {
+            if (type.isImmutableCollection()) {
                 emptyList()
             } else {
                 listOf(
@@ -112,7 +112,7 @@ private fun validateTopLevelProperty(
     val initializer: IrExpressionBody? = property.backingField?.initializer
 
     if (initializer != null) {
-        errors += validateExpression(initializer)
+        errors += validateExpression(initializer.expression, moduleFragment)
     }
 
     return errors
@@ -145,7 +145,7 @@ private fun validateDataClassProperty(
                 ) -> emptyList()
 
         (type?.isSomeCollection(moduleFragment) == true) -> {
-            if (type.isImmutableCollection(moduleFragment)) {
+            if (type.isImmutableCollection()) {
                 emptyList()
             } else {
                 listOf(

@@ -18,7 +18,7 @@ fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
-fun IrType.isImmutableCollection(@Suppress("UNUSED_PARAMETER") moduleFragment: IrModuleFragment): Boolean {
+fun IrType.isImmutableCollection(): Boolean {
     val signature = classifierOrFail.signature
 
     val isImmutableCollection = signature == Signatures.LIST

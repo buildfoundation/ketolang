@@ -126,7 +126,7 @@ class CastTest {
     }
 
     @Test
-    fun `casting in inline function is not allowed`() {
+    fun `casting via inline function is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             inline fun <reified T: Any, V: Any> List<V>.okay() = this as T
@@ -144,6 +144,47 @@ class CastTest {
         assertContains(
             result.messages,
             "Ketolang error: functions accepting mutable parameters are not allowed!, node name = 'okay'"
+        )
+    }
+
+    @Test
+    fun `implicit casting via when statement is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            fun f(i: Int): Int  {
+                val x = if (i > 10) i.toString() else i
+
+                return when (x) {
+                    is String -> (x + "2").toInt()
+                    else -> -1
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `implicit casting to mutable type via when statement is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            fun f(l: List<Int>): List<Int>  {
+                return when (l) {
+                    is MutableList -> { l.add(2); l }
+                    else -> l
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: type check for mutable collection types is not allowed!, node name = 'no printable name'"
         )
     }
 }
