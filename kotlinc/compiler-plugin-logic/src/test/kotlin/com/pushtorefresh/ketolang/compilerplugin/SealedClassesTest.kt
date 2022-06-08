@@ -12,6 +12,8 @@ class SealedClassesTest {
     fun `sealed class with data class allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             sealed class C
             data class D(val i: Int): C()
         """
@@ -25,6 +27,8 @@ class SealedClassesTest {
     fun `sealed class with object allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             sealed class C
             object A: C()
         """
@@ -38,6 +42,8 @@ class SealedClassesTest {
     fun `sealed class with regular class is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             sealed class C
             class A: C()
         """

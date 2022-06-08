@@ -12,6 +12,8 @@ class InterfacesTest {
     fun `interface is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             interface I {
                 
             }
@@ -31,6 +33,8 @@ class InterfacesTest {
     fun `abstract class is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             abstract class A {
                 
             }

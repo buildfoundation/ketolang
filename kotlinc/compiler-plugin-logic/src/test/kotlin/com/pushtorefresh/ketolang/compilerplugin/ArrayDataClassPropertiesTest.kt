@@ -12,6 +12,8 @@ class ArrayDataClassPropertiesTest {
     fun `var Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(var b: Array<Int>)
         """
         )
@@ -29,6 +31,8 @@ class ArrayDataClassPropertiesTest {
     fun `val Array is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val b: Array<Int>)
         """
         )

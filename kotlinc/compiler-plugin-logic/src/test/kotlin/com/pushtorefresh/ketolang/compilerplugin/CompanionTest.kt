@@ -12,6 +12,8 @@ class CompanionTest {
     fun `data class with companion is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int) {
                 companion object {
                     const val s = "abc" 

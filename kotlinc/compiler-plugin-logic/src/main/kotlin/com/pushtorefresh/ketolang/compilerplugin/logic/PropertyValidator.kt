@@ -12,13 +12,21 @@ import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.isEnumClass
 import org.jetbrains.kotlin.ir.util.isObject
+import org.jetbrains.kotlin.ir.util.kotlinFqName
 
 fun validateProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl
 ): List<KetolangValidationError> {
+    val errors = mutableListOf<KetolangValidationError>()
+
     val parent = property.parent
-    return when {
+
+    if (parent.kotlinFqName.isRoot) {
+        errors += KetolangValidationError("Ketolang error: property must be declared in a named package!", property)
+    }
+
+    errors += when {
         parent is IrClass -> {
             when {
                 parent.isObject -> validateObjectProperty(moduleFragment, property)
@@ -40,6 +48,8 @@ fun validateProperty(
             )
         )
     }
+
+    return errors
 }
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)

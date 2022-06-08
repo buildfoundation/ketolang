@@ -12,6 +12,8 @@ class DataClassTest {
     fun `data class(val Int) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val i: Int)
         """
         )
@@ -24,6 +26,8 @@ class DataClassTest {
     fun `data class(data class) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D1(val i: Int)
             data class D2(val d: D1)
         """
@@ -37,6 +41,8 @@ class DataClassTest {
     fun `data class(var Int) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(var i: Int)
         """
         )
@@ -53,6 +59,8 @@ class DataClassTest {
     fun `data class (val List(Int)) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val l: List<Int>)
         """
         )
@@ -65,6 +73,8 @@ class DataClassTest {
     fun `data class (val List(data class)) is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D1(val i: Int)
             data class D2(val l: List<D1>)
         """
@@ -78,6 +88,8 @@ class DataClassTest {
     fun `data class (var List(Int)) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(var l: List<Int>)
         """
         )
@@ -94,7 +106,9 @@ class DataClassTest {
     fun `data class (var List(Any)) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-                data class D(var l: List<Any>)
+            package p
+
+            data class D(var l: List<Any>)
         """
         )
 
@@ -110,6 +124,8 @@ class DataClassTest {
     fun `data class (val MutableList(Int)) is not allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
+            package p
+
             data class D(val l: MutableList<Int>)
         """
         )

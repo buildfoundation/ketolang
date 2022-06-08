@@ -12,10 +12,15 @@ import org.jetbrains.kotlin.ir.util.isEnumClass
 import org.jetbrains.kotlin.ir.util.isEnumEntry
 import org.jetbrains.kotlin.ir.util.isInterface
 import org.jetbrains.kotlin.ir.util.isObject
+import org.jetbrains.kotlin.ir.util.packageFqName
 
 @OptIn(ObsoleteDescriptorBasedAPI::class)
 fun validateClass(clazz: IrClassImpl, moduleFragment: IrModuleFragment): List<KetolangValidationError> {
     val errors = mutableListOf<KetolangValidationError>()
+
+    if (clazz.packageFqName?.isRoot == true) {
+        errors += KetolangValidationError("Ketolang error: class must be declared in a named package!", clazz)
+    }
 
     if (clazz.isInterface || clazz.modality == Modality.ABSTRACT) {
         errors += KetolangValidationError("Ketolang error: abstract classes and interfaces are not allowed!", clazz)
