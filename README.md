@@ -44,3 +44,6 @@ A: Easiest way right now is to clone the repo, open the project in IntelliJ and 
 
 Q: How is Ketolang intended to be integrated into other systems such as Bazel?
 A: Ketolang will be published as compiler plugin to Maven Central, then `.kt` Ketolang files need to be compiled with `kotlinc` targeting either JVM or Native platform with following options respectively `-no-reflect -no-jdk`, see [samples/cli/cli.sh](samples/cli/cli.sh) for reference!
+
+Q: Project Status?
+A: Accumulating feedback from people in the industry: original Kotlin developers from JetBrains, Bazel and Starlark maintainers and such. Collecting bugs, try it out, submit an example of broken code and/or PR to fix it. Once somewhat stabilized, there will be Maven Central publications and integration instructions.
