@@ -6,11 +6,11 @@ Ketolang aims to cover use-cases of Starlark language but in compile-time, type-
 
 List of restricted Kotlin functionality (each option will have feature flag to enable/disable it):
 
-- File IO is not allowed (both reading and writing)
-- Network IO is not allowed (both reading and writing can be restricted)
-- `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
-- Reading environment variables is not allowed
-- Reflection is not allowed
+- [x] File IO is not allowed (both reading and writing)
+- [x] Network IO is not allowed (both reading and writing can be restricted)
+- [x] `System.currentTimeMillis()` and other forms of resolving current time and date are not allowed
+- [x] Reading environment variables is not allowed
+- [x] Reflection is not allowed
 - [x] Global mutable state is not allowed
 - [x] Mutable collections as function args, return type or properties are not allowed
 - [x] Delegated properties are not allowed
