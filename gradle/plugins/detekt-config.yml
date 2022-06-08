@@ -70,6 +70,8 @@ complexity:
     active: false
   LongMethod:
     active: false
+  ComplexMethod:
+    active: false
 
 coroutines:
   InjectDispatcher:

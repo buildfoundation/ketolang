@@ -3,6 +3,7 @@ package com.pushtorefresh.ketolang.compilerplugin.logic
 import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.allParametersCount
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
+import org.jetbrains.kotlin.descriptors.isSealed
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
@@ -14,6 +15,7 @@ import org.jetbrains.kotlin.ir.types.isAny
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isUnit
+import org.jetbrains.kotlin.ir.types.superTypes
 import org.jetbrains.kotlin.ir.util.isReal
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.statements
@@ -95,9 +97,16 @@ private fun validateTopLevelFunction(
 
     if (!function.allParameters.map { it.type }
             .all {
+                val classDescriptor = it.classOrNull?.descriptor
+
                 it.isPrimitiveType()
                         || it.isString()
-                        || it.classOrNull?.descriptor?.isData == true
+                        || classDescriptor?.isData == true
+                        || classDescriptor?.isSealed() == true
+                        || (
+                        it.classOrNull?.superTypes()?.size == 1 && it.classOrNull?.superTypes()
+                            ?.first()?.classOrNull?.descriptor?.isSealed() == true
+                        )
                         || it.isImmutableCollection()
             }) {
         errors += KetolangValidationError(
