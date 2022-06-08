@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 class SealedClassesTest {
 
     @Test
-    fun `sealed class with data class allowed`() {
+    fun `sealed class with data class is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             package p
@@ -24,7 +24,7 @@ class SealedClassesTest {
     }
 
     @Test
-    fun `sealed class with object allowed`() {
+    fun `sealed class with object is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             package p
@@ -56,5 +56,47 @@ class SealedClassesTest {
             result.messages,
             "Ketolang error: regular classes are not allowed, only data classes and enums are allowed!, node name = 'A'"
         )
+    }
+
+    @Test
+    fun `sealed class as function parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            sealed class C
+            object A: C()
+
+            fun f(c: C): String {
+                return c.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `when statement with is check for sealed class is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            sealed class C
+            object A: C()
+            data class D(val i: Int): C()
+
+            fun x(c: C): Int {
+                return when (c) {
+                    is A -> 0
+                    is D -> c.i
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 }
