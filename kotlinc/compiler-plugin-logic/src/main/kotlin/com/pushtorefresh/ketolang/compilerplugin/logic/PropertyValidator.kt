@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.util.isEnumClass
+import org.jetbrains.kotlin.ir.util.isObject
 
 fun validateProperty(
     moduleFragment: IrModuleFragment,
@@ -20,6 +21,7 @@ fun validateProperty(
     return when {
         parent is IrClass -> {
             when {
+                parent.isObject -> validateTopLevelProperty(moduleFragment, property)
                 parent.isData -> validateDataClassProperty(moduleFragment, property)
                 parent.isEnumClass -> validateEnumProperty(moduleFragment, property)
                 else -> listOf(

@@ -46,18 +46,11 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
             is IrFunctionImpl -> validateFunction(moduleFragment, declaration)
             is IrTypeAliasImpl -> validateTypeAlias(declaration)
             is IrClassImpl -> {
-                validateClass(declaration).let { error ->
-                    if (error == null) {
-                        declaration
-                            .declarations
-                            .flatMap { validateDeclaration(moduleFragment, file, it).map { (_, error) -> error } }
-                            .toList()
-                    } else {
-                        listOf(error)
-                    }
-                }
+                validateClass(declaration, moduleFragment) + declaration
+                    .declarations
+                    .flatMap { validateDeclaration(moduleFragment, file, it).map { (_, error) -> error } }
+                    .toList()
             }
-
             else -> emptyList()
         }.map { error -> file to error }
     }
