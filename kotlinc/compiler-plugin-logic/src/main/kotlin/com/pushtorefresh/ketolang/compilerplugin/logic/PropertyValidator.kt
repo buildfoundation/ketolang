@@ -5,7 +5,6 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
-import org.jetbrains.kotlin.ir.expressions.IrExpressionBody
 import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
@@ -130,10 +129,10 @@ private fun validateObjectProperty(
         )
     }
 
-    val initializer: IrExpressionBody? = property.backingField?.initializer
+    val initializer = property.backingField?.initializer
 
     if (initializer != null) {
-        errors += validateExpression(initializer.expression, moduleFragment)
+        errors += validateStatement(initializer.expression, moduleFragment)
     }
 
     return errors
