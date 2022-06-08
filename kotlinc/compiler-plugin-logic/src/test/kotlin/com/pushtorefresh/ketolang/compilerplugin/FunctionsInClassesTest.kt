@@ -124,4 +124,56 @@ class FunctionsInClassesTest {
             "Ketolang error: abstract classes and interfaces are not allowed!, node name = 'C'"
         )
     }
+
+    @Test
+    fun `open function is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            data class D(val i: Int) {
+                open fun f(a: String): Int {
+                    return a.length
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: functions in classes are not allowed!, node name = 'f'"
+        )
+    }
+
+    @Test
+    fun `override function is not allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            sealed class S {
+                open fun f(a: String): Int {
+                    return a.length
+                }
+            }
+
+            data class D(val i: Int): S() {
+                override fun f(a: String): Int {
+                    return a.length + 1
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+
+        assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
+        assertContains(
+            result.messages,
+            "Ketolang error: functions in classes are not allowed!, node name = 'f'"
+        )
+    }
 }

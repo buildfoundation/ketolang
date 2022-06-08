@@ -3,6 +3,7 @@ package com.pushtorefresh.ketolang.compilerplugin.logic
 import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.allParametersCount
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.descriptors.isSealed
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
@@ -73,6 +74,17 @@ private fun validateTopLevelFunction(
 
     if (function.isSuspend) {
         errors += KetolangValidationError("Ketolang error: suspend functions are not allowed!", function)
+    }
+
+    if (function.modality == Modality.OPEN) {
+        errors += KetolangValidationError("Ketolang error: open functions are not allowed!", function)
+    }
+
+    if (function.overriddenSymbols.isNotEmpty()) {
+        errors += KetolangValidationError(
+            "Ketolang error: functions overriding other functions are not allowed!",
+            function
+        )
     }
 
     val returnType = function.returnType
