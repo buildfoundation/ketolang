@@ -46,7 +46,7 @@ $KOTLINC \
         -no-reflect \
         -no-jdk \
         -d kotlinc-out/result.jar \
-        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/Sample.kt
+        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/User.kt
 
 echo "Compiling for Native..."
 $KOTLINC_NATIVE \
@@ -54,4 +54,4 @@ $KOTLINC_NATIVE \
         -nomain \
         -produce library \
         -output kotlinc-out/result.bin \
-        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/Sample.kt
+        ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/User.kt
