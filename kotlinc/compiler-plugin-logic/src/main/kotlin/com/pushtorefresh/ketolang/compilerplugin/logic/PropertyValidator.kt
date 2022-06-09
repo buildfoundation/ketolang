@@ -1,11 +1,9 @@
 package com.pushtorefresh.ketolang.compilerplugin.logic
 
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrPropertyImpl
-import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.isArray
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
@@ -51,7 +49,6 @@ fun validateProperty(
     return errors
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateTopLevelProperty(
     property: IrPropertyImpl,
 ): List<KetolangValidationError> {
@@ -61,7 +58,6 @@ private fun validateTopLevelProperty(
     ))
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateObjectProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl,
@@ -93,7 +89,7 @@ private fun validateObjectProperty(
     }
 
     errors += when {
-        (type?.classOrNull?.descriptor?.isData == true) -> emptyList()
+        (type?.isDataClass() == true) -> emptyList()
         (type?.isSomeCollection(moduleFragment) == true) -> {
             if (type.isImmutableCollection()) {
                 emptyList()
@@ -138,7 +134,6 @@ private fun validateObjectProperty(
     return errors
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateDataClassProperty(
     moduleFragment: IrModuleFragment,
     property: IrPropertyImpl,
@@ -161,7 +156,7 @@ private fun validateDataClassProperty(
     errors += when {
         (type?.isPrimitiveType() == true
                 || type?.isString() == true
-                || type?.classOrNull?.descriptor?.isData == true
+                || type?.isDataClass() == true
                 ) -> emptyList()
 
         (type?.isSomeCollection(moduleFragment) == true) -> {
