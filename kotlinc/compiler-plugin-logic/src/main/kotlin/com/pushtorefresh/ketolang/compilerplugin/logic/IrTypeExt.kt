@@ -1,15 +1,25 @@
 package com.pushtorefresh.ketolang.compilerplugin.logic
 
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
+import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.classOrNull
 import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.typeOrNull
+import org.jetbrains.kotlin.ir.util.isClass
+
+fun IrType.isSealedClass(): Boolean {
+    val clazz = getClass()
+    return clazz?.isClass == true && clazz.modality == Modality.SEALED
+}
+
+fun IrType.isDataClass(): Boolean {
+    return getClass()?.isData == true
+}
 
 fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
     return isSubtypeOfClass(moduleFragment.irBuiltins.collectionClass)
@@ -17,7 +27,6 @@ fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
             || isSubtypeOfClass(moduleFragment.irBuiltins.mutableMapClass)
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 fun IrType.isImmutableCollection(): Boolean {
     val signature = classifierOrFail.signature
 
@@ -29,12 +38,12 @@ fun IrType.isImmutableCollection(): Boolean {
         return false
     }
 
-    (this as IrSimpleTypeImpl);
+    this as IrSimpleTypeImpl
 
     return arguments.all { argument ->
         val type = argument.typeOrNull
         type?.isPrimitiveType() == true
                 || type?.isString() == true
-                || type?.classOrNull?.descriptor?.isData == true
+                || type?.isDataClass() == true
     }
 }

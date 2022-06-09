@@ -27,7 +27,6 @@ allprojects {
 
         tasks.filterIsInstance<KotlinCompile>().forEach { compileKotlin ->
             compileKotlin.kotlinOptions.allWarningsAsErrors = true
-            compileKotlin.kotlinOptions.freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
             compileKotlin.kotlinOptions.jvmTarget = jvmTargetVersion
         }
 

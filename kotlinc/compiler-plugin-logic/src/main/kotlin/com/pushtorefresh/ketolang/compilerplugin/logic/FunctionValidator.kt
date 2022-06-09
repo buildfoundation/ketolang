@@ -4,22 +4,19 @@ import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.allParametersCount
 import org.jetbrains.kotlin.backend.common.ir.isTopLevel
 import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.isSealed
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
-import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
-import org.jetbrains.kotlin.ir.types.classOrNull
+import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.isAny
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isUnit
-import org.jetbrains.kotlin.ir.types.superTypes
 import org.jetbrains.kotlin.ir.util.isReal
 import org.jetbrains.kotlin.ir.util.kotlinFqName
 import org.jetbrains.kotlin.ir.util.statements
+import org.jetbrains.kotlin.name.SpecialNames
 
 fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl): List<KetolangValidationError> {
     val errors = mutableListOf<KetolangValidationError>()
@@ -42,9 +39,8 @@ fun validateFunction(moduleFragment: IrModuleFragment, function: IrFunctionImpl)
     return errors
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateClassFunction(function: IrFunctionImpl): List<KetolangValidationError> {
-    if (function.descriptor is IrConstructor) {
+    if (function.name == SpecialNames.INIT) {
         // Do we need additional constructor validation?
         return emptyList()
     } else if (!function.isReal) {
@@ -65,7 +61,6 @@ private fun validateClassFunction(function: IrFunctionImpl): List<KetolangValida
     }
 }
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 private fun validateTopLevelFunction(
     moduleFragment: IrModuleFragment,
     function: IrFunctionImpl
@@ -109,15 +104,13 @@ private fun validateTopLevelFunction(
 
     if (!function.allParameters.map { it.type }
             .all {
-                val classDescriptor = it.classOrNull?.descriptor
-
                 it.isPrimitiveType()
                         || it.isString()
-                        || classDescriptor?.isData == true
-                        || classDescriptor?.isSealed() == true
+                        || it.isDataClass()
+                        || it.isSealedClass()
                         || (
-                        it.classOrNull?.superTypes()?.size == 1 && it.classOrNull?.superTypes()
-                            ?.first()?.classOrNull?.descriptor?.isSealed() == true
+                        it.getClass()?.superTypes?.size == 1 && it.getClass()?.superTypes
+                            ?.first()?.isSealedClass() == true
                         )
                         || it.isImmutableCollection()
             }) {

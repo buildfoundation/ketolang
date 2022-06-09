@@ -1,11 +1,8 @@
 package com.pushtorefresh.ketolang.compilerplugin.logic
 
 import org.jetbrains.kotlin.descriptors.Modality
-import org.jetbrains.kotlin.descriptors.isSealed
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
-import org.jetbrains.kotlin.ir.types.classifierOrNull
 import org.jetbrains.kotlin.ir.types.isAny
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.isEnumClass
@@ -14,7 +11,6 @@ import org.jetbrains.kotlin.ir.util.isInterface
 import org.jetbrains.kotlin.ir.util.isObject
 import org.jetbrains.kotlin.ir.util.packageFqName
 
-@OptIn(ObsoleteDescriptorBasedAPI::class)
 fun validateClass(clazz: IrClassImpl, moduleFragment: IrModuleFragment): List<KetolangValidationError> {
     val errors = mutableListOf<KetolangValidationError>()
 
@@ -59,7 +55,7 @@ fun validateClass(clazz: IrClassImpl, moduleFragment: IrModuleFragment): List<Ke
             // Ok
         } else if (superType.isSubtypeOfClass(moduleFragment.irBuiltins.enumClass)) {
             // Ok
-        } else if (superType.classifierOrNull?.descriptor?.isSealed() != true) {
+        } else if (!superType.isSealedClass()) {
             errors += KetolangValidationError(
                 "Ketolang error: classes can only extend sealed classes!",
                 clazz
