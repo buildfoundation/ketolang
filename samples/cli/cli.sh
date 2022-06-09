@@ -45,6 +45,7 @@ $KOTLINC \
         -Xplugin=$KETOLANG_KOTLINC_PLUGIN_JAR \
         -no-reflect \
         -no-jdk \
+        -Werror \
         -d kotlinc-out/result.jar \
         ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/User.kt
 
@@ -53,5 +54,6 @@ $KOTLINC_NATIVE \
         -Xplugin=$KETOLANG_KOTLINC_PLUGIN_JAR \
         -nomain \
         -produce library \
+        -Werror \
         -output kotlinc-out/result.bin \
         ../../src/main/kotlin/com/pushtorefresh/ketolang/sample/User.kt
