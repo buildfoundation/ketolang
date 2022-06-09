@@ -57,7 +57,7 @@ A: Easiest way right now is to clone the repo, open the project in IntelliJ CE a
 A: Ketolang will target IntelliJ CE, it will use existing Kotlin Common (MultiPlatform) support, meaning JDK functions will not be available, allowing only generic subset of Kotlin. Ketolang libraries will be dependent on as sources, thus be fully available to compiler, IDE and debugger!
 
 ##### Q: How Ketolang should be compiled?
-A: Ketolang libraries should be distributed as source archives. Then a library should be compiled with Ketolang compiler plugin into a JVM or Native distributable w/ respective flags `-no-reflect -no-jdk`, this is to optimize code recompilation instead of compiling entire source set every time. Resulting set of JVM or Native libraries then can be combined into an executable. See [samples/cli/cli.sh](samples/cli/cli.sh) for reference!  
+A: Ketolang libraries should be distributed as source archives. Then a library should be compiled with Ketolang compiler plugin into a JVM or Native distributable w/ respective flags `-no-reflect -no-jdk -Werror`, compiling each library separately is optimization used by many build systems to avoid massive recompilations and achieve parallelism. Resulting set of JVM or Native libraries then can be combined into an executable. See [samples/cli/cli.sh](samples/cli/cli.sh) for reference!  
 
 ##### Q: Project Status?
 A: Accumulating feedback from people in the industry: original Kotlin developers from JetBrains, Bazel and Starlark maintainers and such. Collecting bugs. Try it out, submit an example of broken code and/or PR to fix it! Once somewhat stabilized, there will be Maven Central publications and integration instructions.
