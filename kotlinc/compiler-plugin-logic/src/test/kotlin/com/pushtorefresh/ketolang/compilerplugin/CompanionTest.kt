@@ -28,7 +28,7 @@ class CompanionTest {
         assertContains(
             result.messages,
             "Ketolang error: companion objects are not allowed! " +
-                    "Please use top-level object classes or top-level properties, node name = 'Companion'"
+                    "Please use top-level object classes, node name = 'Companion'"
         )
     }
 }

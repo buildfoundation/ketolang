@@ -46,7 +46,7 @@ class ArrayAsObjectPropertiesTest {
         assertEquals(KotlinCompilation.ExitCode.COMPILATION_ERROR, result.exitCode)
         assertContains(
             result.messages,
-            "Ketolang error: top-level array properties are not allowed because arrays are mutable, node name = 'b'"
+            "Ketolang error: array properties are not allowed because arrays are mutable, node name = 'b'"
         )
     }
 }

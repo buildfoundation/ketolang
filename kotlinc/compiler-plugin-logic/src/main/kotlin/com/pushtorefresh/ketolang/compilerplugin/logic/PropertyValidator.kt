@@ -105,7 +105,7 @@ private fun validateObjectProperty(
 
         (type?.isArray() == true) -> listOf(
             KetolangValidationError(
-                "Ketolang error: top-level array properties are not allowed because arrays are mutable",
+                "Ketolang error: array properties are not allowed because arrays are mutable",
                 property
             )
         )

@@ -32,7 +32,7 @@ fun validateClass(clazz: IrClassImpl, moduleFragment: IrModuleFragment): List<Ke
         if (clazz.isCompanion) {
             errors += KetolangValidationError(
                 "Ketolang error: companion objects are not allowed! " +
-                        "Please use top-level object classes or top-level properties",
+                        "Please use top-level object classes",
                 clazz
             )
         }
