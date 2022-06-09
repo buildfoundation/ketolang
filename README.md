@@ -6,7 +6,7 @@ Ketolang is a dialect of Kotlin without side-effects, it allows only immutable d
 
 Ketolang aims to cover use-cases of Starlark language but in compile-time, type-safe environment of Kotlin, with benefit of running in a more performant environment than an interpreter (JVM, Native and maybe JS).
 
-List of restricted Kotlin functionality (feature toggles coming):
+List of restricted Kotlin functionality (TODO feature toggles):
 
 - [x] File IO is not allowed
 - [x] Network IO is not allowed
@@ -28,7 +28,7 @@ Design of Ketolang allows an integration environment to apply optimizations like
 - Execute functions in parallel
 - Cache function invocations
 
-(That's what Bazel ~does with Starlark)
+(That's what Bazel ~does with Starlark).
 
 ## FAQ
 
@@ -58,6 +58,9 @@ A: Ketolang will target IntelliJ CE, it will use existing Kotlin Common (MultiPl
 
 ##### Q: How Ketolang should be compiled?
 A: Ketolang libraries should be distributed as source archives. Then a library should be compiled with Ketolang compiler plugin into a JVM or Native distributable w/ respective flags `-no-reflect -no-jdk -Werror`, compiling each library separately is optimization used by many build systems to avoid massive recompilations and achieve parallelism. Resulting set of JVM or Native libraries then can be combined into an executable. See [samples/cli/cli.sh](samples/cli/cli.sh) for reference!  
+
+##### Q: Why typealiases, regular classes, interfaces and other Kotlin feautures not related to mutability are restricted?
+A: Some restrictions are in to reduce complexity of Ketolang and to make code easier to maintain by people w/o experience w/ Kotlin.
 
 ##### Q: Project Status?
 A: Accumulating feedback from people in the industry: original Kotlin developers from JetBrains, Bazel and Starlark maintainers and such. Collecting bugs. Try it out, submit an example of broken code and/or PR to fix it! Once somewhat stabilized, there will be Maven Central publications and integration instructions.
