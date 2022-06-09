@@ -45,25 +45,25 @@ allprojects {
                     baseline = moduleDetektBaseline
                 }
                 basePath = projectDir.path
-                reports {
-                    xml {
-                        enabled = true
-                    }
-                    html {
-                        enabled = false
-                    }
-                    txt {
-                        enabled = false
-                    }
-                    // FYI: Sarif upload to GitHub requires GitHub Enterprise tear.
-                    sarif {
-                        enabled = false
-                    }
-                }
             }
 
             tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
                 jvmTarget = jvmTargetVersion
+                reports {
+                    xml {
+                        required.set(true)
+                    }
+                    html {
+                        required.set(true)
+                    }
+                    txt {
+                        required.set(false)
+                    }
+                    // FYI: Sarif upload to GitHub requires GitHub Enterprise tear.
+                    sarif {
+                        required.set(false)
+                    }
+                }
             }
         }
 
