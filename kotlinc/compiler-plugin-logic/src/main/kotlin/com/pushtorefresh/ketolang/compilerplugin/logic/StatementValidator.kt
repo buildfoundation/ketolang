@@ -3,6 +3,7 @@ package com.pushtorefresh.ketolang.compilerplugin.logic
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
+import org.jetbrains.kotlin.ir.expressions.IrLoop
 import org.jetbrains.kotlin.ir.expressions.IrTypeOperator
 import org.jetbrains.kotlin.ir.expressions.impl.IrBlockImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
@@ -27,7 +28,6 @@ private val prohibitedPackages: Set<String> = setOf(
     "kotlin.math",
     "kotlin.properties",
     "kotlin.random",
-    "kotlin.ranges",
     "kotlin.reflect",
     "kotlin.system",
     "kotlin.time",
@@ -109,6 +109,15 @@ fun validateStatement(statement: IrStatement, moduleFragment: IrModuleFragment):
                 "Ketolang error: using 'try-catch' is not allowed, all exceptions are fatal!",
                 statement
             )
+        }
+
+        is IrLoop -> {
+            if (statement.label != null) {
+                errors += KetolangValidationError(
+                    "Ketolang error: using labels is not allowed!",
+                    statement
+                )
+            }
         }
     }
 
