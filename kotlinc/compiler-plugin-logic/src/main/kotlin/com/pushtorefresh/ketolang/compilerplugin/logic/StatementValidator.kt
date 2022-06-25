@@ -9,6 +9,8 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrIfThenElseImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrReturnImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrThrowImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrTryImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrTypeOperatorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrWhenImpl
 
@@ -93,6 +95,20 @@ fun validateStatement(statement: IrStatement, moduleFragment: IrModuleFragment):
             errors += statement.branches.flatMap {
                 validateStatement(it.condition, moduleFragment) + validateStatement(it.result, moduleFragment)
             }
+        }
+
+        is IrThrowImpl -> {
+            errors += KetolangValidationError(
+                "Ketolang error: using 'throw' is not allowed, use 'error(\"text\")'!",
+                statement
+            )
+        }
+
+        is IrTryImpl -> {
+            errors += KetolangValidationError(
+                "Ketolang error: using 'try-catch' is not allowed, all exceptions are fatal!",
+                statement
+            )
         }
     }
 
