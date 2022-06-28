@@ -112,6 +112,11 @@ fun validateStatement(statement: IrStatement, moduleFragment: IrModuleFragment):
         }
 
         is IrLoop -> {
+            errors += KetolangValidationError(
+                "Ketolang error: using loops is not allowed! Use Kotlin collections/streaming API",
+                statement
+            )
+
             if (statement.label != null) {
                 errors += KetolangValidationError(
                     "Ketolang error: using labels is not allowed!",
