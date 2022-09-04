@@ -14,6 +14,9 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrThrowImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrTryImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrTypeOperatorCallImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrWhenImpl
+import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.util.getPackageFragment
+import org.jetbrains.kotlin.name.parentOrNull
 
 private val prohibitedPackages: Set<String> = setOf(
     "kotlin.annotation",
@@ -49,7 +52,7 @@ fun validateStatement(statement: IrStatement, moduleFragment: IrModuleFragment):
         }
 
         is IrCallImpl -> {
-            val packageFqn = statement.symbol.signature?.packageFqName()?.asString()
+            val packageFqn = statement.symbol.owner.getPackageFragment()?.fqName?.toString()
             if (prohibitedPackages.contains(packageFqn)) {
                 errors += KetolangValidationError("Ketolang error: call to prohibited package $packageFqn!", statement)
             }
@@ -62,7 +65,7 @@ fun validateStatement(statement: IrStatement, moduleFragment: IrModuleFragment):
         }
 
         is IrConstructorCallImpl -> {
-            val packageFqn = statement.symbol.signature?.packageFqName()?.asString()
+            val packageFqn = statement.type.classFqName?.parentOrNull()?.toString()
             if (prohibitedPackages.contains(packageFqn)) {
                 errors += KetolangValidationError(
                     "Ketolang error: call to prohibited package $packageFqn!",

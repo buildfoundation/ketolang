@@ -110,7 +110,8 @@ private fun validateTopLevelFunction(
                         || it.isSealedClass()
                         || (
                         it.getClass()?.superTypes?.size == 1 && it.getClass()?.superTypes
-                            ?.first()?.isSealedClass() == true
+                            ?.first()
+                            ?.isSealedClass() == true
                         )
                         || it.isImmutableCollection()
             }) {

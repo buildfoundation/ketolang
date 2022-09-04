@@ -3,9 +3,9 @@ package com.pushtorefresh.ketolang.compilerplugin.logic
 import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 import org.jetbrains.kotlin.ir.types.IrType
-import org.jetbrains.kotlin.ir.types.classifierOrFail
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
+import org.jetbrains.kotlin.ir.types.isClassType
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
@@ -28,11 +28,9 @@ fun IrType.isSomeCollection(moduleFragment: IrModuleFragment): Boolean {
 }
 
 fun IrType.isImmutableCollection(): Boolean {
-    val signature = classifierOrFail.signature
-
-    val isImmutableCollection = signature == Signatures.LIST
-            || signature == Signatures.SET
-            || signature == Signatures.MAP
+    val isImmutableCollection = isClassType(Signatures.LIST_FQN, false) || isClassType(Signatures.LIST_FQN, true)
+            || isClassType(Signatures.SET_FQN, false) || isClassType(Signatures.SET_FQN, true)
+            || isClassType(Signatures.MAP_FQN, false) || isClassType(Signatures.MAP_FQN, true)
 
     if (!isImmutableCollection) {
         return false

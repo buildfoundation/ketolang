@@ -1,11 +1,9 @@
 package com.pushtorefresh.ketolang.compilerplugin.logic
 
-import org.jetbrains.kotlin.builtins.StandardNames
-import org.jetbrains.kotlin.ir.types.getPublicSignature
+import org.jetbrains.kotlin.name.FqNameUnsafe
 
 object Signatures {
-    val LIST = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "List")
-    val SET = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Set")
-    val MAP = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "Map")
-    val SIGNATURE_MUTABLE_MAP = getPublicSignature(StandardNames.COLLECTIONS_PACKAGE_FQ_NAME, "MutableMap")
+    val LIST_FQN = FqNameUnsafe("kotlin.collections.List")
+    val SET_FQN = FqNameUnsafe("kotlin.collections.Set")
+    val MAP_FQN = FqNameUnsafe("kotlin.collections.Map")
 }
