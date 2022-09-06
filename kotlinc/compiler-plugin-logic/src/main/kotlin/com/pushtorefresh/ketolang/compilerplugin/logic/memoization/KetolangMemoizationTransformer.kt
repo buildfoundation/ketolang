@@ -1,4 +1,4 @@
-@file:Suppress("unused", "UNUSED_VARIABLE")
+@file:Suppress("unused", "UNUSED_VARIABLE", "UNUSED_PARAMETER")
 
 package com.pushtorefresh.ketolang.compilerplugin.logic.memoization
 
@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.createImplicitParameterDeclarationWithWrappedDescriptor
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.jvm.functionByName
 import org.jetbrains.kotlin.backend.jvm.ir.fileParent
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
@@ -19,14 +20,22 @@ import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
+import org.jetbrains.kotlin.ir.builders.irBlock
+import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irExprBody
+import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irTemporary
+import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
+import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
+import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -36,6 +45,7 @@ import org.jetbrains.kotlin.ir.util.isAccessor
 import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.isArrayOrNullableArray
 
 class KetolangMemoizationTransformer(
     private val pluginContext: IrPluginContext,
@@ -51,11 +61,20 @@ class KetolangMemoizationTransformer(
     private val javaUtilConcurrentHashMap: IrClassSymbol =
         createClass(javaUtilConcurrent, "ConcurrentHashMap", ClassKind.CLASS, Modality.OPEN)
 
-    private val concurrentHashMapConstructor: IrConstructorSymbol = javaUtilConcurrentHashMap.owner.addConstructor().symbol
+    private val concurrentHashMapConstructor: IrConstructorSymbol =
+        javaUtilConcurrentHashMap.owner.addConstructor().symbol
+
+    private val mutableMapGetFunction = pluginContext.symbols.mutableMap.functionByName("get")
+
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val listOfMultiArgFunction = pluginContext.irBuiltIns
+        .findFunctions(Name.identifier("listOf"), "kotlin", "collections")
+        .single { it.descriptor.valueParameters.firstOrNull() { it.type.isArrayOrNullableArray() } != null }
 
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
-        if (declaration.isAccessor || declaration.isFakeOverride) {
-            return super.visitFunctionNew(declaration)
+        val function = declaration
+        if (function.isAccessor || function.isFakeOverride) {
+            return super.visitFunctionNew(function)
         }
 
         // If Body is not Block -> turn it into a Block.
@@ -66,35 +85,41 @@ class KetolangMemoizationTransformer(
 //                }
 //        }
 
-        generateCacheProperty(declaration)
+        val memoizedStorageProperty = generateMemoizedStorageProperty(function)
+        function.fileParent.declarations.add(memoizedStorageProperty)
 
-        /*DeclarationIrBuilder(pluginContext, declaration.symbol)
-            .irBlockBody {
-                +irCall()
-            }*/
+        val functionBody = function.body as IrBlockBody
 
-        return super.visitFunctionNew(declaration)
+        val memoizedKeyVariable = generateMemoizedKeyVariable(function)
+        functionBody.statements.add(0, memoizedKeyVariable)
+
+        val checkMemoizedStorageAndReturnValueStatements =
+            generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
+        //functionBody.statements.addAll(0, checkMemoizedStorageAndReturnValueStatements)
+
+        return super.visitFunctionNew(function)
     }
 
-    // Inserts "val cache_funname_arg_types: MutableMap<Any, Any?> = ConcurrentHashMap()" to the file where function is declared.
-    private fun generateCacheProperty(declaration: IrFunction) {
-        val paramFqns = declaration.allParameters
+    // TODO generate specialized versions for function with 1 parameter
+    //  so we don't have to allocate a List of keys to query memoized storage.
+    private fun generateMemoizedStorageProperty(function: IrFunction): IrProperty {
+        val paramFqns = function.allParameters
             .joinToString("_") { it.type.classFqName.toString().replace('.', 'D') }
 
-        val fileParent = declaration.fileParent
+        val fileParent = function.fileParent
 
         // Limit on JVM field names is 65k symbols https://stackoverflow.com/a/8782542/1562633
         // TODO check JS and Native and try to shorten the name while keeping it unique.
-        val identifier = Name.identifier("memoized_${declaration.name.asString()}_$paramFqns")
+        val identifier = Name.identifier("memoized_${function.name.asString()}_$paramFqns")
 
-        val property = declaration.factory.buildProperty {
+        return function.factory.buildProperty {
             name = identifier
             isVar = false
             visibility = PRIVATE
         }.apply {
             parent = fileParent
 
-            backingField = declaration.factory.buildField {
+            backingField = function.factory.buildField {
                 name = identifier
                 origin = IrDeclarationOrigin.PROPERTY_BACKING_FIELD
                 isFinal = true
@@ -102,23 +127,66 @@ class KetolangMemoizationTransformer(
                 visibility = PRIVATE
                 type = pluginContext.irBuiltIns.mutableMapClass.typeWith(
                     pluginContext.irBuiltIns.anyType,
-                    pluginContext.irBuiltIns.anyType
+                    function.returnType
                 )
             }.apply {
                 initializer = pluginContext.createIrBuilder(symbol).run {
                     irExprBody(
                         irCallConstructor(
-                            concurrentHashMapConstructor, listOf(
+                            concurrentHashMapConstructor,
+                            typeArguments = listOf(
                                 pluginContext.irBuiltIns.anyType,
-                                pluginContext.irBuiltIns.anyType
+                                function.returnType
                             )
                         )
                     )
                 }
             }
         }
+    }
 
-        fileParent.declarations.add(property)
+    private fun generateMemoizedKeyVariable(function: IrFunction): IrVariable {
+        var memoizedKey: IrVariable? = null
+        pluginContext.createIrBuilder(function.symbol).run {
+            irBlock {
+                memoizedKey = irTemporary(
+                    nameHint = "memoized_key",
+                    value = irCall(listOfMultiArgFunction).apply {
+                        //dispatchReceiver = irGetObject(parceler.symbol)
+                        val getParams = function.valueParameters.map { irGet(it) }
+                        putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, getParams))
+                    },
+                    irType = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType),
+                    isMutable = false
+                )
+            }
+        }
+
+        return memoizedKey!!
+    }
+
+    private fun generateCheckMemoizedStorageAndReturnStatements(
+        function: IrFunction,
+        memoizedStorage: IrProperty,
+        memoizedKey: IrVariable
+    ): List<IrStatement> {
+        val statements: List<IrStatement>
+
+        pluginContext.createIrBuilder(function.symbol).run {
+            statements = irBlock {
+                +irTemporary(
+                    nameHint = "memoized_value",
+                    value = irCall(mutableMapGetFunction, pluginContext.irBuiltIns.anyType).apply {
+                        //dispatchReceiver = irGet(headerInfo.objectVariable)
+                        //putValueArgument(0, irGet(inductionVariable))
+                    },
+                    irType = pluginContext.irBuiltIns.anyType,
+                    isMutable = false,
+                )
+            }.statements
+        }
+
+        return statements
     }
 
     /**

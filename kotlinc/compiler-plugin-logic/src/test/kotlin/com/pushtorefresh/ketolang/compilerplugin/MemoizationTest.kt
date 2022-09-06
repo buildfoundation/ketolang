@@ -33,9 +33,14 @@ class MemoizationTest {
             "a.kt", """
             package p
 
-            //val x: MutableMap<Any, Any> = java.util.concurrent.ConcurrentHashMap<Any, Any>()
+            val cache: MutableMap<Any, String> = java.util.concurrent.ConcurrentHashMap<Any, String>()
 
             fun f(b: Int): String {
+                val cacheKey = listOf(b, b)
+                val cached = cache.get(cacheKey)
+                if (cached != null) {
+                    return cached
+                }
                 return b.toString()
             }
 
