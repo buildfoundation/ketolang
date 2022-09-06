@@ -10,7 +10,7 @@ mkdir -p build/cli-sample
 cd build/cli-sample
 
 # Kotlin compiler
-KOTLINC_VERSION=1.6.21
+KOTLINC_VERSION=1.7.10
 if [[ ! -f kotlinc.zip ]]; then
   echo "Downloading kotlinc..."
   curl \

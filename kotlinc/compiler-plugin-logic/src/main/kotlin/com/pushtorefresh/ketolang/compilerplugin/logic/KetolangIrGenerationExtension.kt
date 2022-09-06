@@ -1,5 +1,6 @@
 package com.pushtorefresh.ketolang.compilerplugin.logic
 
+import com.pushtorefresh.ketolang.compilerplugin.logic.memoization.KetolangMemoizationTransformer
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
@@ -34,6 +35,8 @@ class KetolangIrGenerationExtension(private val messageCollector: MessageCollect
                 "Ketolang validation errors were found, aborting compilation!"
             )
         }
+
+        moduleFragment.transform(KetolangMemoizationTransformer(pluginContext, messageCollector), data = null)
     }
 
     private fun validateDeclaration(
