@@ -106,6 +106,8 @@ class KetolangMemoizationTransformer(
             generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
         functionBody.statements.addAll(1, checkMemoizedStorageAndReturnValueStatements)
 
+        // TODO do not replace our own generated return!
+        // TODO make sure we're diving deep into statements, use transforming visitor perhaps.
         functionBody.statements.replaceAll { statement ->
             when (statement) {
                 is IrReturn -> generateReturnReplacementStatements(
