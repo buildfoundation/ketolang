@@ -35,18 +35,24 @@ class MemoizationTest {
 
             val cache: MutableMap<Any, String> = java.util.concurrent.ConcurrentHashMap<Any, String>()
 
-            fun f(b: Int): String {
+            fun f1(b: Int): String {
+                return b.toString()
+            }
+    
+            fun f2(b: Int): String {
                 val cacheKey = listOf(b, b)
                 val cached = cache.get(cacheKey)
                 if (cached != null) {
                     return cached
                 }
-                return b.toString()
+                val new = b.toString()
+                cache[cacheKey] = new
+                return new
             }
 
             fun b(s: String): String {
-                val a = f(1)
-                val b = if (s.isEmpty()) f(1) else f(2)
+                val a = f1(1)
+                val b = if (s.isEmpty()) f1(1) else f1(2)
                 return a + b
             }
         """

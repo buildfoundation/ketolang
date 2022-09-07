@@ -7,6 +7,7 @@ import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.ir.allParameters
 import org.jetbrains.kotlin.backend.common.ir.createImplicitParameterDeclarationWithWrappedDescriptor
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.backend.common.lower.irIfThen
 import org.jetbrains.kotlin.backend.jvm.functionByName
 import org.jetbrains.kotlin.backend.jvm.ir.fileParent
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
@@ -20,12 +21,15 @@ import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
-import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irNotEquals
+import org.jetbrains.kotlin.ir.builders.irNull
+import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.builders.irVararg
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
@@ -41,6 +45,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.isAccessor
 import org.jetbrains.kotlin.ir.util.isFakeOverride
@@ -96,7 +101,7 @@ class KetolangMemoizationTransformer(
 
         val checkMemoizedStorageAndReturnValueStatements =
             generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
-        functionBody.statements.addAll(0, checkMemoizedStorageAndReturnValueStatements)
+        functionBody.statements.addAll(1, checkMemoizedStorageAndReturnValueStatements)
 
         return super.visitFunctionNew(function)
     }
@@ -147,25 +152,18 @@ class KetolangMemoizationTransformer(
     }
 
     private fun generateMemoizedKeyVariable(function: IrFunction): IrVariable {
-        pluginContext.createIrBuilder(function.symbol).run {
+        return pluginContext.createIrBuilder(function.symbol).run {
             irBlock {
-                return@generateMemoizedKeyVariable buildVariable(
-                    parent = function,
-                    startOffset = function.startOffset,
-                    endOffset = function.endOffset,
-                    origin = IrDeclarationOrigin.DEFINED,
-                    name = Name.identifier("memoized_key"),
-                    type = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType)
-                ).apply {
-                    initializer = irCall(listOfMultiArgFunction).apply {
-                        //dispatchReceiver = irGetObject(parceler.symbol)
-                        val getParams = function.valueParameters.map { irGet(it) }
-                        putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, getParams))
-                    }
-                }
+                irTemporary(
+                    nameHint = "memoized_key",
+                    irType = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType),
+                    value = irCall(listOfMultiArgFunction).apply {
+                        val params = function.valueParameters.map { irGet(it) }
+                        putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, params))
+                    },
+                )
             }
-        }
-        error("Unreachable")
+        }.statements.single() as IrVariable
     }
 
     // See AndroidIrExtension.getCachedFindViewByIdFun
@@ -174,23 +172,20 @@ class KetolangMemoizationTransformer(
         memoizedStorage: IrProperty,
         memoizedKey: IrVariable
     ): List<IrStatement> {
-        val statements: List<IrStatement>
-
-        pluginContext.createIrBuilder(function.symbol).run {
-            statements = irBlock {
-                +irTemporary(
+        return pluginContext.createIrBuilder(function.symbol).run {
+            irBlock {
+                val memoizedValue = irTemporary(
                     nameHint = "memoized_value",
                     value = irCall(mutableMapGetFunction, pluginContext.irBuiltIns.anyType).apply {
-                        //dispatchReceiver = irGet(headerInfo.objectVariable)
+                        dispatchReceiver = irGetField(null, memoizedStorage.backingField!!)
                         putValueArgument(0, irGet(memoizedKey))
                     },
-                    irType = pluginContext.irBuiltIns.anyType,
-                    isMutable = false,
+                    irType = function.returnType.makeNullable(),
                 )
-            }.statements
-        }
 
-        return statements
+                +irIfThen(irNotEquals(irGet(memoizedValue), irNull()), irReturn(irGet(memoizedValue)))
+            }
+        }.statements
     }
 
     /**
