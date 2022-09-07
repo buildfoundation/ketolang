@@ -42,6 +42,8 @@ import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
+import org.jetbrains.kotlin.ir.expressions.IrContainerExpression
+import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
@@ -51,6 +53,7 @@ import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.isAccessor
 import org.jetbrains.kotlin.ir.util.isFakeOverride
+import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.isArrayOrNullableArray
@@ -106,18 +109,33 @@ class KetolangMemoizationTransformer(
             generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
         functionBody.statements.addAll(1, checkMemoizedStorageAndReturnValueStatements)
 
-        // TODO do not replace our own generated return!
-        // TODO make sure we're diving deep into statements, use transforming visitor perhaps.
-        functionBody.statements.replaceAll { statement ->
-            when (statement) {
-                is IrReturn -> generateReturnReplacementStatements(
-                    function,
-                    memoizedStorageProperty,
-                    memoizedKeyVariable,
-                    statement
-                )
+        // Start replacing returns only below our own injected statements.
+        val returnSearchIndexFrom = /* memoizedKeyVariable */ 1 + checkMemoizedStorageAndReturnValueStatements.size
 
-                else -> statement
+        // TODO make sure we're diving deep into statements, use transforming visitor perhaps.
+        for (i in returnSearchIndexFrom until functionBody.statements.size) {
+            when (val statement = functionBody.statements[i]) {
+                is IrReturn -> {
+                    functionBody.statements[i] = generateReturnReplacementStatements(
+                        function,
+                        memoizedStorageProperty,
+                        memoizedKeyVariable,
+                        statement
+                    )
+                }
+
+                else -> {
+                    statement.transformChildren(object : IrElementTransformer<Unit> {
+                        override fun visitReturn(expression: IrReturn, data: Unit): IrExpression {
+                            return generateReturnReplacementStatements(
+                                function,
+                                memoizedStorageProperty,
+                                memoizedKeyVariable,
+                                expression
+                            )
+                        }
+                    }, Unit)
+                }
             }
         }
 
@@ -215,7 +233,7 @@ class KetolangMemoizationTransformer(
         memoizedStorage: IrProperty,
         memoizedKey: IrVariable,
         originalReturnStatement: IrReturn
-    ): IrStatement {
+    ): IrContainerExpression {
         return pluginContext.createIrBuilder(function.symbol).run {
             irBlock {
                 val originalReturnResult = irTemporary(
