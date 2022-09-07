@@ -31,7 +31,7 @@ class MemoizationTest {
     fun `ok`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
-            package p
+            package com.pushtorefresh.ketolang.sample
 
             val cache: MutableMap<Any, String> = java.util.concurrent.ConcurrentHashMap<Any, String>()
 
