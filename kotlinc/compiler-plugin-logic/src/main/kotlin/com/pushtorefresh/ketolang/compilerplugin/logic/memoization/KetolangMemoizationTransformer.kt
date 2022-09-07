@@ -56,6 +56,7 @@ import org.jetbrains.kotlin.ir.util.isFakeOverride
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.platform.jvm.JvmPlatform
 import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.isArrayOrNullableArray
 
 class KetolangMemoizationTransformer(
@@ -66,15 +67,9 @@ class KetolangMemoizationTransformer(
     private val irFactory: IrFactory = IrFactoryImpl
 
     @OptIn(ObsoleteDescriptorBasedAPI::class)
-    private val javaUtilConcurrent: IrPackageFragment =
-        createPackage(pluginContext.moduleDescriptor, "java.util.concurrent")
-
-    private val javaUtilConcurrentHashMap: IrClassSymbol =
-        createClass(javaUtilConcurrent, "ConcurrentHashMap", ClassKind.CLASS, Modality.OPEN)
-
-    private val concurrentHashMapConstructor: IrConstructorSymbol =
-        javaUtilConcurrentHashMap.owner.addConstructor().symbol
-
+    private val mutableMapFunction = pluginContext.irBuiltIns
+        .findFunctions(Name.identifier("mutableMapOf"), "kotlin", "collections")
+        .single { it.descriptor.valueParameters.isEmpty() }
     private val mutableMapGetFunction = pluginContext.symbols.mutableMap.functionByName("get")
     private val mutableMapPutFunction = pluginContext.symbols.mutableMap.functionByName("put")
 
@@ -171,13 +166,24 @@ class KetolangMemoizationTransformer(
             }.apply {
                 initializer = pluginContext.createIrBuilder(symbol).run {
                     irExprBody(
-                        irCallConstructor(
-                            concurrentHashMapConstructor,
-                            typeArguments = listOf(
-                                pluginContext.irBuiltIns.anyType,
-                                function.returnType
+                        when {
+                            (pluginContext.platform!!.single() is JvmPlatform) -> irCallConstructor(
+                                concurrentHashMapConstructor,
+                                typeArguments = listOf(
+                                    pluginContext.irBuiltIns.anyType,
+                                    function.returnType
+                                )
                             )
-                        )
+
+                            // TODO investigate Native and JS ConcurrentHashMap alternatives
+                            // TODO JS can be concurrent on NodeJS afaik, but is single-threaded in browser?
+                            else -> irCall(mutableMapFunction).apply {
+                                type = pluginContext.symbols.mutableMap.typeWith(
+                                    pluginContext.irBuiltIns.anyType,
+                                    function.returnType
+                                )
+                            }
+                        }
                     )
                 }
             }
@@ -251,6 +257,17 @@ class KetolangMemoizationTransformer(
             }
         }
     }
+
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val javaUtilConcurrent: IrPackageFragment =
+        createPackage(pluginContext.moduleDescriptor, "java.util.concurrent")
+
+    private val javaUtilConcurrentHashMap: IrClassSymbol =
+        createClass(javaUtilConcurrent, "ConcurrentHashMap", ClassKind.CLASS, Modality.OPEN)
+
+    private val concurrentHashMapConstructor: IrConstructorSymbol =
+        javaUtilConcurrentHashMap.owner.addConstructor().symbol
+
 
     /**
      * @see org.jetbrains.kotlin.android.parcel.ir.AndroidSymbols.createPackage

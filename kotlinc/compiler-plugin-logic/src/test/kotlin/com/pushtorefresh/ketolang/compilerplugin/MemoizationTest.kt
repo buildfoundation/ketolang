@@ -33,7 +33,7 @@ class MemoizationTest {
             "a.kt", """
             package com.pushtorefresh.ketolang.sample
 
-            val cache: MutableMap<Any, String> = java.util.concurrent.ConcurrentHashMap<Any, String>()
+            val cache: MutableMap<Any, String> = mutableMapOf()
 
             fun f1(b: Int): String {
                 return b.toString()
