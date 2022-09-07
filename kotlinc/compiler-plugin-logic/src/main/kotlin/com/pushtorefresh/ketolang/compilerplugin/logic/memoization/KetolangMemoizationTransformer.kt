@@ -21,6 +21,7 @@ import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
+import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
@@ -41,6 +42,7 @@ import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
 import org.jetbrains.kotlin.ir.expressions.IrBlockBody
+import org.jetbrains.kotlin.ir.expressions.IrReturn
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
@@ -71,6 +73,7 @@ class KetolangMemoizationTransformer(
         javaUtilConcurrentHashMap.owner.addConstructor().symbol
 
     private val mutableMapGetFunction = pluginContext.symbols.mutableMap.functionByName("get")
+    private val mutableMapPutFunction = pluginContext.symbols.mutableMap.functionByName("put")
 
     @OptIn(ObsoleteDescriptorBasedAPI::class)
     private val listOfMultiArgFunction = pluginContext.irBuiltIns
@@ -103,11 +106,22 @@ class KetolangMemoizationTransformer(
             generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
         functionBody.statements.addAll(1, checkMemoizedStorageAndReturnValueStatements)
 
+        functionBody.statements.replaceAll { statement ->
+            when (statement) {
+                is IrReturn -> generateReturnReplacementStatements(
+                    function,
+                    memoizedStorageProperty,
+                    memoizedKeyVariable,
+                    statement
+                )
+
+                else -> statement
+            }
+        }
+
         return super.visitFunctionNew(function)
     }
 
-    // TODO generate specialized versions for function with 1 parameter
-    //  so we don't have to allocate a List of keys to query memoized storage.
     private fun generateMemoizedStorageProperty(function: IrFunction): IrProperty {
         val paramFqns = function.allParameters
             .joinToString("_") { it.type.classFqName.toString().replace('.', 'D') }
@@ -120,7 +134,6 @@ class KetolangMemoizationTransformer(
 
         return function.factory.buildProperty {
             name = identifier
-            isVar = false
             visibility = PRIVATE
         }.apply {
             parent = fileParent
@@ -151,17 +164,24 @@ class KetolangMemoizationTransformer(
         }
     }
 
+    // TODO generate specialized versions for function with 1 parameter
+    //  so we don't have to allocate a List of keys to query memoized storage.
     private fun generateMemoizedKeyVariable(function: IrFunction): IrVariable {
         return pluginContext.createIrBuilder(function.symbol).run {
             irBlock {
-                irTemporary(
-                    nameHint = "memoized_key",
-                    irType = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType),
-                    value = irCall(listOfMultiArgFunction).apply {
+                +buildVariable(
+                    name = Name.identifier("ketolang_memoized_key"),
+                    type = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType),
+                    parent = function,
+                    startOffset = startOffset,
+                    endOffset = endOffset,
+                    origin = IrDeclarationOrigin.DEFINED
+                ).apply {
+                    initializer = irCall(listOfMultiArgFunction).apply {
                         val params = function.valueParameters.map { irGet(it) }
                         putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, params))
-                    },
-                )
+                    }
+                }
             }
         }.statements.single() as IrVariable
     }
@@ -176,16 +196,40 @@ class KetolangMemoizationTransformer(
             irBlock {
                 val memoizedValue = irTemporary(
                     nameHint = "memoized_value",
-                    value = irCall(mutableMapGetFunction, pluginContext.irBuiltIns.anyType).apply {
+                    irType = function.returnType.makeNullable(),
+                    value = irCall(mutableMapGetFunction, pluginContext.irBuiltIns.anyNType).apply {
                         dispatchReceiver = irGetField(null, memoizedStorage.backingField!!)
                         putValueArgument(0, irGet(memoizedKey))
                     },
-                    irType = function.returnType.makeNullable(),
                 )
 
                 +irIfThen(irNotEquals(irGet(memoizedValue), irNull()), irReturn(irGet(memoizedValue)))
             }
         }.statements
+    }
+
+    private fun generateReturnReplacementStatements(
+        function: IrFunction,
+        memoizedStorage: IrProperty,
+        memoizedKey: IrVariable,
+        originalReturnStatement: IrReturn
+    ): IrStatement {
+        return pluginContext.createIrBuilder(function.symbol).run {
+            irBlock {
+                val originalReturnResult = irTemporary(
+                    nameHint = "original_return_result",
+                    value = originalReturnStatement.value
+                )
+
+                +irCall(mutableMapPutFunction, pluginContext.irBuiltIns.anyNType).apply {
+                    dispatchReceiver = irGetField(null, memoizedStorage.backingField!!)
+                    putValueArgument(0, irGet(memoizedKey))
+                    putValueArgument(1, irGet(originalReturnResult))
+                }
+
+                +irReturn(irGet(originalReturnResult))
+            }
+        }
     }
 
     /**
