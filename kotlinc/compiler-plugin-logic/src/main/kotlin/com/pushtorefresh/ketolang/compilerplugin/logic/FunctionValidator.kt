@@ -10,6 +10,8 @@ import org.jetbrains.kotlin.ir.declarations.impl.IrClassImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFunctionImpl
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.isAny
+import org.jetbrains.kotlin.ir.types.isNullablePrimitiveType
+import org.jetbrains.kotlin.ir.types.isNullableString
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isUnit
@@ -105,7 +107,9 @@ private fun validateTopLevelFunction(
     if (!function.allParameters.map { it.type }
             .all {
                 it.isPrimitiveType()
+                        || it.isNullablePrimitiveType()
                         || it.isString()
+                        || it.isNullableString()
                         || it.isDataClass()
                         || it.isSealedClass()
                         || (

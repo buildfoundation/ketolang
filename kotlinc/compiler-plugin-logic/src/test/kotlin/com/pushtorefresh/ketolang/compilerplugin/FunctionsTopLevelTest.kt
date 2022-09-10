@@ -109,6 +109,22 @@ class FunctionsTopLevelTest {
     }
 
     @Test
+    fun `nullable Int parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f(b: Int?): String {
+                return b?.toString() ?: "null"
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `data class parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
@@ -142,12 +158,76 @@ class FunctionsTopLevelTest {
     }
 
     @Test
+    fun `nullable String parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f(b: String): String {
+                return b
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `List(Int) parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f(b: List<Int>): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `List(nullable Int) parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f(b: List<Int?>): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `List(String) parameter is allowed`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             package p
 
             fun f(b: List<String>): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `List(nullable String) parameter is allowed`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f(b: List<String?>): String {
                 return b.toString()
             }
         """

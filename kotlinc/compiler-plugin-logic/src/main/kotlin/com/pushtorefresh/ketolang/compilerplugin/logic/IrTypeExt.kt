@@ -6,6 +6,8 @@ import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.getClass
 import org.jetbrains.kotlin.ir.types.impl.IrSimpleTypeImpl
 import org.jetbrains.kotlin.ir.types.isClassType
+import org.jetbrains.kotlin.ir.types.isNullablePrimitiveType
+import org.jetbrains.kotlin.ir.types.isNullableString
 import org.jetbrains.kotlin.ir.types.isPrimitiveType
 import org.jetbrains.kotlin.ir.types.isString
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
@@ -41,7 +43,9 @@ fun IrType.isImmutableCollection(): Boolean {
     return arguments.all { argument ->
         val type = argument.typeOrNull
         type?.isPrimitiveType() == true
+                || type?.isNullablePrimitiveType() == true
                 || type?.isString() == true
+                || type?.isNullableString() == true
                 || type?.isDataClass() == true
     }
 }

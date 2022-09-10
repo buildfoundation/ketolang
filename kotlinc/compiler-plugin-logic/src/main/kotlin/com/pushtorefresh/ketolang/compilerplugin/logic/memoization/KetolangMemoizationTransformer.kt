@@ -321,9 +321,7 @@ class KetolangMemoizationTransformer(
         createImplicitParameterDeclarationWithWrappedDescriptor()
     }.symbol
 
+    // See org.jetbrains.kotlin.fir.backend.IrBuiltInsOverFir.kotlinBuiltinFunctions
     private fun IrPluginContext.createIrBuilder(symbol: IrSymbol) =
         DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
-
-    // See org.jetbrains.kotlin.fir.backend.IrBuiltInsOverFir.kotlinBuiltinFunctions
-
 }

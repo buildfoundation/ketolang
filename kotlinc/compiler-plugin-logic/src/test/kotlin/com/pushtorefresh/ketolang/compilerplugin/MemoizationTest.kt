@@ -105,6 +105,20 @@ class MemoizationTest {
     }
 
     @Test
+    fun `single nullable parameter function`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int?): String = b?.toString() ?: "null"
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
     fun `naive fibonacci`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
