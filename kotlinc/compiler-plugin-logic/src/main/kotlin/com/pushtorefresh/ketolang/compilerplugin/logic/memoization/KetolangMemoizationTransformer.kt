@@ -18,6 +18,8 @@ import org.jetbrains.kotlin.descriptors.ModuleDescriptor
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.declarations.addConstructor
+import org.jetbrains.kotlin.ir.builders.declarations.addFunction
+import org.jetbrains.kotlin.ir.builders.declarations.addValueParameter
 import org.jetbrains.kotlin.ir.builders.declarations.buildClass
 import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
@@ -38,6 +40,7 @@ import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrPackageFragment
 import org.jetbrains.kotlin.ir.declarations.IrProperty
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrVariable
 import org.jetbrains.kotlin.ir.declarations.impl.IrExternalPackageFragmentImpl
 import org.jetbrains.kotlin.ir.declarations.impl.IrFactoryImpl
@@ -49,6 +52,7 @@ import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.isAccessor
@@ -57,7 +61,6 @@ import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.platform.jvm.JvmPlatform
-import org.jetbrains.kotlin.types.checker.SimpleClassicTypeSystemContext.isArrayOrNullableArray
 
 class KetolangMemoizationTransformer(
     private val pluginContext: IrPluginContext,
@@ -66,20 +69,14 @@ class KetolangMemoizationTransformer(
 
     private val irFactory: IrFactory = IrFactoryImpl
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
-    private val mutableMapFunction = pluginContext.irBuiltIns
-        .findFunctions(Name.identifier("mutableMapOf"), "kotlin", "collections")
-        .single { it.descriptor.valueParameters.isEmpty() }
+
     private val mutableMapGetFunction = pluginContext.symbols.mutableMap.functionByName("get")
     private val mutableMapPutFunction = pluginContext.symbols.mutableMap.functionByName("put")
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
-    private val listOfMultiArgFunction = pluginContext.irBuiltIns
-        .findFunctions(Name.identifier("listOf"), "kotlin", "collections")
-        .single { it.descriptor.valueParameters.firstOrNull() { it.type.isArrayOrNullableArray() } != null }
-
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
+        @Suppress("UnnecessaryVariable")
         val function = declaration
+
         if (function.isAccessor || function.isFakeOverride) {
             return super.visitFunctionNew(function)
         }
@@ -107,7 +104,6 @@ class KetolangMemoizationTransformer(
         // Start replacing returns only below our own injected statements.
         val returnSearchIndexFrom = /* memoizedKeyVariable */ 1 + checkMemoizedStorageAndReturnValueStatements.size
 
-        // TODO make sure we're diving deep into statements, use transforming visitor perhaps.
         for (i in returnSearchIndexFrom until functionBody.statements.size) {
             when (val statement = functionBody.statements[i]) {
                 is IrReturn -> {
@@ -177,7 +173,8 @@ class KetolangMemoizationTransformer(
 
                             // TODO investigate Native and JS ConcurrentHashMap alternatives
                             // TODO JS can be concurrent on NodeJS afaik, but is single-threaded in browser?
-                            else -> irCall(mutableMapFunction).apply {
+                            // Check https://github.com/touchlab/Stately
+                            else -> irCall(mutableMapOfFunction).apply {
                                 type = pluginContext.symbols.mutableMap.typeWith(
                                     pluginContext.irBuiltIns.anyType,
                                     function.returnType
@@ -190,8 +187,8 @@ class KetolangMemoizationTransformer(
         }
     }
 
-    // TODO generate specialized versions for function with 1 parameter
-    //  so we don't have to allocate a List of keys to query memoized storage.
+    // TODO generate specialized versions for function with 1, 2 and 3 parameters
+    // so we don't have to allocate a List (and its backing array) of keys to query memoized storage.
     private fun generateMemoizedKeyVariable(function: IrFunction): IrVariable {
         return pluginContext.createIrBuilder(function.symbol).run {
             irBlock {
@@ -268,6 +265,35 @@ class KetolangMemoizationTransformer(
     private val concurrentHashMapConstructor: IrConstructorSymbol =
         javaUtilConcurrentHashMap.owner.addConstructor().symbol
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val kotlinCollectionsPkg: IrPackageFragment =
+        createPackage(pluginContext.moduleDescriptor, "kotlin.collections")
+
+    private val kotlinCollectionsClass: IrClassSymbol =
+        createClass(kotlinCollectionsPkg, "CollectionsKt", ClassKind.CLASS, Modality.OPEN)
+
+    private val listOfMultiArgFunction: IrSimpleFunction =
+        kotlinCollectionsClass.owner.addFunction(
+            "listOf",
+            pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyNType),
+            isStatic = true,
+        ).apply {
+            addValueParameter {
+                name = Name.identifier("elements")
+                type = pluginContext.irBuiltIns.arrayClass.defaultType
+                //this.varargElementType = typeParameters[0].defaultType
+            }
+        }
+
+    private val mutableMapOfFunction: IrSimpleFunction =
+        kotlinCollectionsClass.owner.addFunction(
+            "mutableMapOf",
+            pluginContext.irBuiltIns.mutableMapClass.typeWith(
+                pluginContext.irBuiltIns.anyNType,
+                pluginContext.irBuiltIns.anyNType
+            ),
+            isStatic = true
+        )
 
     /**
      * @see org.jetbrains.kotlin.android.parcel.ir.AndroidSymbols.createPackage
@@ -297,5 +323,7 @@ class KetolangMemoizationTransformer(
 
     private fun IrPluginContext.createIrBuilder(symbol: IrSymbol) =
         DeclarationIrBuilder(this, symbol, symbol.owner.startOffset, symbol.owner.endOffset)
+
+    // See org.jetbrains.kotlin.fir.backend.IrBuiltInsOverFir.kotlinBuiltinFunctions
 
 }

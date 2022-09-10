@@ -8,27 +8,28 @@ import kotlin.test.assertEquals
 
 class MemoizationTest {
 
-    val NULL_INDICATOR = Any()
+    @Test
+    fun `ok`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package com.pushtorefresh.ketolang.sample
 
-    val cache = mutableMapOf<String, Any?>()
+            val cache: MutableMap<Any, String> = mutableMapOf()
 
-    fun fCached(functionId: String, args: List<Any?>, compute: (List<Any?>) -> Any?): Any? {
-        val cached = cache[functionId]
-        return if (cached != null) {
-            if (cached == NULL_INDICATOR) {
-                null
-            } else {
-                cached
+            fun f1(b: Int): String {
+                return listOf(b, b).toString()
             }
-        } else {
-            val new = compute(args) ?: NULL_INDICATOR
-            cache[functionId] = new
-            new
-        }
+        """
+        )
+
+        val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }.forEach { it.copyTo(File(it.name), overwrite = true) }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
     @Test
-    fun `ok`() {
+    fun `ok2`() {
         val aKt = SourceFile.kotlin(
             "a.kt", """
             package com.pushtorefresh.ketolang.sample
@@ -70,6 +71,60 @@ class MemoizationTest {
         val result = compile(aKt)
         // Copy files to IJ workspace to decompile and investigate, TODO remove
         result.compiledClassAndResourceFiles.filter { it.extension == "class" }.forEach { it.copyTo(File(it.name), overwrite = true) }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `single parameter function`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int): String {
+                return b.toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `single parameter function as expression`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int): String = b.toString()
+        """
+        )
+
+        val result = compile(aKt)
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `naive fibonacci`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package com.pushtorefresh.ketolang.sample
+
+            // fib(n) = fib(n - 1) + fib(n - 2)
+            fun naiveFibonacci(n: Int): Int {
+                if (n == 0 || n == 1) {
+                    return n
+                } else {
+                    return naiveFibonacci(n - 1) + naiveFibonacci(n - 2)
+                }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }
+            .forEach { it.copyTo(File(it.name), overwrite = true) }
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 }
