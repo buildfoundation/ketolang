@@ -26,7 +26,7 @@ Cornerstone idea is that a function in Ketolang must produce same output for a g
 Design of Ketolang allows an integration environment to apply optimizations like:
 
 - Execute functions in parallel
-- Cache function invocations
+- [x] Memoize function invocations (implemented!)
 
 (That's what Bazel ~does with Starlark).
 
