@@ -21,6 +21,9 @@ class MemoizationTest {
         )
 
         val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }
+            .forEach { it.copyTo(File(it.name), overwrite = true) }
         assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
     }
 
@@ -85,6 +88,63 @@ class MemoizationTest {
                 } else {
                     return naiveFibonacci(n - 1) + naiveFibonacci(n - 2)
                 }
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }
+            .forEach { it.copyTo(File(it.name), overwrite = true) }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `tuple parameter function`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int, c: Int): String {
+                return (b + c).toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }
+            .forEach { it.copyTo(File(it.name), overwrite = true) }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `triple parameter function`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int, c: Int, d: Int): String {
+                return (b + c + d).toString()
+            }
+        """
+        )
+
+        val result = compile(aKt)
+        // Copy files to IJ workspace to decompile and investigate, TODO remove
+        result.compiledClassAndResourceFiles.filter { it.extension == "class" }
+            .forEach { it.copyTo(File(it.name), overwrite = true) }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+
+    @Test
+    fun `quadruple parameter function`() {
+        val aKt = SourceFile.kotlin(
+            "a.kt", """
+            package p
+
+            fun f1(b: Int, c: Int, d: Int, e: Int): String {
+                return (b + c + d + e).toString()
             }
         """
         )
