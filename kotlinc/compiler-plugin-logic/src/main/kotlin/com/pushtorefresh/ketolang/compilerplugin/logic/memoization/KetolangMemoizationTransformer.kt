@@ -104,6 +104,33 @@ class KetolangMemoizationTransformer(
     private val kotlinCollectionsPkg: IrPackageFragment =
         createPackage(pluginContext.moduleDescriptor, "kotlin.collections")
 
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val kotlinPkg: IrPackageFragment =
+        createPackage(pluginContext.moduleDescriptor, "kotlin")
+
+    private val kotlinPairClass: IrClassSymbol =
+        createClass(kotlinPkg, "Pair", ClassKind.CLASS, Modality.FINAL)
+
+    private val kotlinPairConstructor: IrConstructorSymbol =
+        kotlinPairClass.owner.addConstructor()
+            .apply {
+                addValueParameter("first", pluginContext.irBuiltIns.anyNType)
+                addValueParameter("second", pluginContext.irBuiltIns.anyNType)
+            }
+            .symbol
+
+    private val kotlinTripleClass: IrClassSymbol =
+        createClass(kotlinPkg, "Triple", ClassKind.CLASS, Modality.FINAL)
+
+    private val kotlinTripleConstructor: IrConstructorSymbol =
+        kotlinTripleClass.owner.addConstructor()
+            .apply {
+                addValueParameter("first", pluginContext.irBuiltIns.anyNType)
+                addValueParameter("second", pluginContext.irBuiltIns.anyNType)
+                addValueParameter("third", pluginContext.irBuiltIns.anyNType)
+            }
+            .symbol
+
     private val kotlinCollectionsClass: IrClassSymbol =
         createClass(kotlinCollectionsPkg, "CollectionsKt", ClassKind.CLASS, Modality.OPEN)
 
@@ -250,22 +277,57 @@ class KetolangMemoizationTransformer(
         }
     }
 
-    // TODO generate specialized versions for function with 1, 2 and 3 parameters
-    // so we don't have to allocate a List (and its backing array) of keys to query memoized storage.
     private fun generateMemoizedKeyVariable(function: IrFunction): IrVariable {
         return pluginContext.createIrBuilder(function.symbol).run {
             irBlock {
                 +buildVariable(
                     name = Name.identifier("ketolang_memoized_key"),
-                    type = pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyType),
+                    type = pluginContext.irBuiltIns.anyType,
                     parent = function,
                     startOffset = startOffset,
                     endOffset = endOffset,
                     origin = IrDeclarationOrigin.DEFINED
                 ).apply {
-                    initializer = irCall(listOfMultiArgFunction).apply {
-                        val params = function.valueParameters.map { irGet(it) }
-                        putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, params))
+                    initializer = when (function.valueParameters.size) {
+                        1 -> {
+                            if (function.valueParameters.single().type.isNullable()) {
+                                irIfThenElse(
+                                    type = pluginContext.irBuiltIns.anyType,
+                                    condition = irEqeqeq(
+                                        irGet(function.valueParameters.single()),
+                                        irGetObject(nullIndicator)
+                                    ),
+                                    thenPart = irGetObject(nullIndicator),
+                                    elsePart = irGet(function.valueParameters.single())
+                                )
+                            } else {
+                                irGet(function.valueParameters.single())
+                            }
+                        }
+
+                        2 -> {
+                            irCall(kotlinPairConstructor).apply {
+                                function.valueParameters.forEach {
+                                    putValueArgument(it.index, irGet(it))
+                                }
+                            }
+                        }
+
+                        @Suppress("MagicNumber")
+                        3 -> {
+                            irCall(kotlinTripleConstructor).apply {
+                                function.valueParameters.forEach {
+                                    putValueArgument(it.index, irGet(it))
+                                }
+                            }
+                        }
+
+                        else -> {
+                            irCall(listOfMultiArgFunction).apply {
+                                val params = function.valueParameters.map { irGet(it) }
+                                putValueArgument(0, irVararg(pluginContext.irBuiltIns.anyType, params))
+                            }
+                        }
                     }
                 }
             }
