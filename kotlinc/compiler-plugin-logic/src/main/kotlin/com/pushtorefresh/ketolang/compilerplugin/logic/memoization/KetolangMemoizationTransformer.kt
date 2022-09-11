@@ -10,6 +10,7 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.backend.common.lower.irIfThen
 import org.jetbrains.kotlin.backend.jvm.functionByName
 import org.jetbrains.kotlin.backend.jvm.ir.fileParent
+import org.jetbrains.kotlin.backend.jvm.ir.isInCurrentModule
 import org.jetbrains.kotlin.cli.common.messages.MessageCollector
 import org.jetbrains.kotlin.descriptors.ClassKind
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities.PRIVATE
@@ -25,16 +26,22 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildField
 import org.jetbrains.kotlin.ir.builders.declarations.buildProperty
 import org.jetbrains.kotlin.ir.builders.declarations.buildVariable
 import org.jetbrains.kotlin.ir.builders.irBlock
+import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irCallConstructor
+import org.jetbrains.kotlin.ir.builders.irEqeqeq
+import org.jetbrains.kotlin.ir.builders.irEquals
 import org.jetbrains.kotlin.ir.builders.irExprBody
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irGetField
+import org.jetbrains.kotlin.ir.builders.irGetObject
+import org.jetbrains.kotlin.ir.builders.irIfThenElse
 import org.jetbrains.kotlin.ir.builders.irNotEquals
 import org.jetbrains.kotlin.ir.builders.irNull
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irTemporary
 import org.jetbrains.kotlin.ir.builders.irVararg
+import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrFactory
 import org.jetbrains.kotlin.ir.declarations.IrFunction
@@ -48,15 +55,21 @@ import org.jetbrains.kotlin.ir.expressions.IrBlockBody
 import org.jetbrains.kotlin.ir.expressions.IrContainerExpression
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrReturn
+import org.jetbrains.kotlin.ir.expressions.IrSyntheticBody
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
 import org.jetbrains.kotlin.ir.symbols.IrConstructorSymbol
 import org.jetbrains.kotlin.ir.symbols.IrSymbol
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.defaultType
+import org.jetbrains.kotlin.ir.types.getClass
+import org.jetbrains.kotlin.ir.types.isNullable
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.companionObject
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.isAccessor
 import org.jetbrains.kotlin.ir.util.isFakeOverride
+import org.jetbrains.kotlin.ir.util.statements
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformer
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -73,21 +86,71 @@ class KetolangMemoizationTransformer(
     private val mutableMapGetFunction = pluginContext.symbols.mutableMap.functionByName("get")
     private val mutableMapPutFunction = pluginContext.symbols.mutableMap.functionByName("put")
 
+    // It is extremely unlikely that "Double.companion" object will be used as a return type,
+    // thus we use it as null value indicator.
+    private val nullIndicator = pluginContext.irBuiltIns.doubleType.getClass()!!.companionObject()!!.symbol
+
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val javaUtilConcurrent: IrPackageFragment =
+        createPackage(pluginContext.moduleDescriptor, "java.util.concurrent")
+
+    private val javaUtilConcurrentHashMap: IrClassSymbol =
+        createClass(javaUtilConcurrent, "ConcurrentHashMap", ClassKind.CLASS, Modality.OPEN)
+
+    private val concurrentHashMapConstructor: IrConstructorSymbol =
+        javaUtilConcurrentHashMap.owner.addConstructor().symbol
+
+    @OptIn(ObsoleteDescriptorBasedAPI::class)
+    private val kotlinCollectionsPkg: IrPackageFragment =
+        createPackage(pluginContext.moduleDescriptor, "kotlin.collections")
+
+    private val kotlinCollectionsClass: IrClassSymbol =
+        createClass(kotlinCollectionsPkg, "CollectionsKt", ClassKind.CLASS, Modality.OPEN)
+
+    private val listOfMultiArgFunction: IrSimpleFunction =
+        kotlinCollectionsClass.owner.addFunction(
+            "listOf",
+            pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyNType),
+            isStatic = true,
+        ).apply {
+            addValueParameter {
+                name = Name.identifier("elements")
+                type = pluginContext.irBuiltIns.arrayClass.defaultType
+            }
+        }
+
+    private val mutableMapOfFunction: IrSimpleFunction =
+        kotlinCollectionsClass.owner.addFunction(
+            "mutableMapOf",
+            pluginContext.irBuiltIns.mutableMapClass.typeWith(
+                pluginContext.irBuiltIns.anyNType,
+                pluginContext.irBuiltIns.anyNType
+            ),
+            isStatic = true
+        )
+
     override fun visitFunctionNew(declaration: IrFunction): IrStatement {
         @Suppress("UnnecessaryVariable")
         val function = declaration
 
-        if (function.isAccessor || function.isFakeOverride) {
+        val parent = function.parent
+
+        if (function.isAccessor
+            || function.isFakeOverride
+            || !function.isInCurrentModule()
+            || (parent is IrClass && parent.constructors.contains(function))
+            || function.body is IrSyntheticBody
+        ) {
             return super.visitFunctionNew(function)
         }
 
         // If Body is not Block -> turn it into a Block.
-//        if (declaration.body !is IrBlockBody) {
-//            declaration.body = DeclarationIrBuilder(pluginContext, declaration.symbol)
-//                .irBlockBody {
-//                    declaration.body!!.statements.forEach { +it }
-//                }
-//        }
+        if (declaration.body !is IrBlockBody) {
+            declaration.body = DeclarationIrBuilder(pluginContext, declaration.symbol)
+                .irBlockBody {
+                    declaration.body!!.statements.forEach { +it }
+                }
+        }
 
         val memoizedStorageProperty = generateMemoizedStorageProperty(function)
         function.fileParent.declarations.add(memoizedStorageProperty)
@@ -98,7 +161,7 @@ class KetolangMemoizationTransformer(
         functionBody.statements.add(0, memoizedKeyVariable)
 
         val checkMemoizedStorageAndReturnValueStatements =
-            generateCheckMemoizedStorageAndReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
+            generateEarlyReturnStatements(function, memoizedStorageProperty, memoizedKeyVariable)
         functionBody.statements.addAll(1, checkMemoizedStorageAndReturnValueStatements)
 
         // Start replacing returns only below our own injected statements.
@@ -210,7 +273,7 @@ class KetolangMemoizationTransformer(
     }
 
     // See AndroidIrExtension.getCachedFindViewByIdFun
-    private fun generateCheckMemoizedStorageAndReturnStatements(
+    private fun generateEarlyReturnStatements(
         function: IrFunction,
         memoizedStorage: IrProperty,
         memoizedKey: IrVariable
@@ -226,7 +289,22 @@ class KetolangMemoizationTransformer(
                     },
                 )
 
-                +irIfThen(irNotEquals(irGet(memoizedValue), irNull()), irReturn(irGet(memoizedValue)))
+                if (function.returnType.isNullable()) {
+                    +irIfThen(
+                        irNotEquals(
+                            irGet(memoizedValue), irNull()
+                        ),
+                        irIfThenElse(
+                            condition = irEqeqeq(irGet(memoizedValue), irGetObject(nullIndicator)),
+                            thenPart = irReturn(irNull()),
+                            elsePart = irReturn(irGet(memoizedValue)),
+                            type = function.returnType
+                        )
+                    )
+                } else {
+                    // In all other cases "null" indicates cache miss.
+                    +irIfThen(irNotEquals(irGet(memoizedValue), irNull()), irReturn(irGet(memoizedValue)))
+                }
             }
         }.statements
     }
@@ -244,56 +322,28 @@ class KetolangMemoizationTransformer(
                     value = originalReturnStatement.value
                 )
 
+                val valueExpression: IrExpression =
+                    if (function.returnType.isNullable()) {
+                        irIfThenElse(
+                            type = pluginContext.irBuiltIns.anyNType,
+                            condition = irEquals(irGet(originalReturnResult), irNull()),
+                            thenPart = irGetObject(nullIndicator),
+                            elsePart = irGet(originalReturnResult)
+                        )
+                    } else {
+                        irGet(originalReturnResult)
+                    }
+
                 +irCall(mutableMapPutFunction, pluginContext.irBuiltIns.anyNType).apply {
                     dispatchReceiver = irGetField(null, memoizedStorage.backingField!!)
                     putValueArgument(0, irGet(memoizedKey))
-                    putValueArgument(1, irGet(originalReturnResult))
+                    putValueArgument(1, valueExpression)
                 }
 
                 +irReturn(irGet(originalReturnResult))
             }
         }
     }
-
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
-    private val javaUtilConcurrent: IrPackageFragment =
-        createPackage(pluginContext.moduleDescriptor, "java.util.concurrent")
-
-    private val javaUtilConcurrentHashMap: IrClassSymbol =
-        createClass(javaUtilConcurrent, "ConcurrentHashMap", ClassKind.CLASS, Modality.OPEN)
-
-    private val concurrentHashMapConstructor: IrConstructorSymbol =
-        javaUtilConcurrentHashMap.owner.addConstructor().symbol
-
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
-    private val kotlinCollectionsPkg: IrPackageFragment =
-        createPackage(pluginContext.moduleDescriptor, "kotlin.collections")
-
-    private val kotlinCollectionsClass: IrClassSymbol =
-        createClass(kotlinCollectionsPkg, "CollectionsKt", ClassKind.CLASS, Modality.OPEN)
-
-    private val listOfMultiArgFunction: IrSimpleFunction =
-        kotlinCollectionsClass.owner.addFunction(
-            "listOf",
-            pluginContext.irBuiltIns.listClass.typeWith(pluginContext.irBuiltIns.anyNType),
-            isStatic = true,
-        ).apply {
-            addValueParameter {
-                name = Name.identifier("elements")
-                type = pluginContext.irBuiltIns.arrayClass.defaultType
-                //this.varargElementType = typeParameters[0].defaultType
-            }
-        }
-
-    private val mutableMapOfFunction: IrSimpleFunction =
-        kotlinCollectionsClass.owner.addFunction(
-            "mutableMapOf",
-            pluginContext.irBuiltIns.mutableMapClass.typeWith(
-                pluginContext.irBuiltIns.anyNType,
-                pluginContext.irBuiltIns.anyNType
-            ),
-            isStatic = true
-        )
 
     /**
      * @see org.jetbrains.kotlin.android.parcel.ir.AndroidSymbols.createPackage
