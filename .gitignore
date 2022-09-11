@@ -11,3 +11,6 @@ hs_err_pid*
 
 # OS garbage
 **/.DS_store
+
+# Debugging
+**/*.class

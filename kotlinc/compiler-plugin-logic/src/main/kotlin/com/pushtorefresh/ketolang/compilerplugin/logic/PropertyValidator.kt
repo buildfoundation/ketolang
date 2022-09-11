@@ -37,6 +37,7 @@ fun validateProperty(
                 )
             }
         }
+
         property.isTopLevel -> validateTopLevelProperty(property)
         else -> listOf(
             KetolangValidationError(
@@ -52,10 +53,12 @@ fun validateProperty(
 private fun validateTopLevelProperty(
     property: IrPropertyImpl,
 ): List<KetolangValidationError> {
-    return listOf(KetolangValidationError(
-        "Ketolang error: top-level properties are not allowed! Use object class to declare them",
-        property
-    ))
+    return listOf(
+        KetolangValidationError(
+            "Ketolang error: top-level properties are not allowed! Use object class to declare them",
+            property
+        )
+    )
 }
 
 private fun validateObjectProperty(
